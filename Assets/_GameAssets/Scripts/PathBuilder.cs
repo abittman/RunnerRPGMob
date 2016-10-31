@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
 public enum MoveDirection
@@ -18,6 +19,9 @@ public class PathBuilder : MonoBehaviour
 
     public int currentPathProgress = 0;
 
+    public int pathLength = 5;
+
+    bool lastIsTownPart = false;
     public GameObject lastPath;
     public GameObject lastPath_LRAlternative;
     public GameObject currentPath;
@@ -81,7 +85,9 @@ public class PathBuilder : MonoBehaviour
                 lastPath_LRAlternative = nextLeftPath;
                 tookRight = true;
             }
-            
+
+            StartCoroutine(DestroyPastPathsOnDelay());
+
             currentPos = currentPath.transform.position;
             endLocation = currentPos;
 
@@ -222,30 +228,58 @@ public class PathBuilder : MonoBehaviour
                     break;
             }
         }
-        //Spawn left path
-        GameObject leftG = Instantiate(sectionObj, transform) as GameObject;
-        Debug.Log("Left path at " + nextLeftLocation + " | " + nextLeftEulerRotation);
-        leftG.transform.position = nextLeftLocation;
-        leftG.transform.eulerAngles = nextLeftEulerRotation;
-        leftG.GetComponentInChildren<PathTriggerArea>().pathBuilder = this;
-        nextLeftPath = leftG;
 
-        //Spawn right path
-        GameObject rightG = Instantiate(sectionObj, transform) as GameObject;
-        Debug.Log("Right path at " + nextRightLocation + " | " + nextRightEulerRotation);
+        if (currentPathProgress <= pathLength)
+        {
+            //Spawn left path
+            GameObject leftG = Instantiate(sectionObj, transform) as GameObject;
+            Debug.Log("Left path at " + nextLeftLocation + " | " + nextLeftEulerRotation);
+            leftG.transform.position = nextLeftLocation;
+            leftG.transform.eulerAngles = nextLeftEulerRotation;
+            leftG.GetComponentInChildren<PathTriggerArea>().pathBuilder = this;
+            nextLeftPath = leftG;
 
-        rightG.transform.position = nextRightLocation;
-        rightG.transform.eulerAngles = nextRightEulerRotation;
-        rightG.GetComponentInChildren<PathTriggerArea>().pathBuilder = this;
-        nextRightPath = rightG;
+            //Spawn right path
+            GameObject rightG = Instantiate(sectionObj, transform) as GameObject;
+            Debug.Log("Right path at " + nextRightLocation + " | " + nextRightEulerRotation);
 
-        currentPathProgress++;
+            rightG.transform.position = nextRightLocation;
+            rightG.transform.eulerAngles = nextRightEulerRotation;
+            rightG.GetComponentInChildren<PathTriggerArea>().pathBuilder = this;
+            nextRightPath = rightG;
+
+            currentPathProgress++;
+        }
+        else
+        {
+            //Move Town - need to figure out the maths here
+            townObject.transform.position = nextRightLocation;
+            townObject.SetActive(true);
+        }
     }
 
     public void PathStarted(GameObject startPathRef, MoveDirection moveDirection)
     {
+        lastIsTownPart = true;
         currentPath = startPathRef;
         currentMoveDirection = moveDirection;
         Debug.Log(currentPath);
+    }
+
+    IEnumerator DestroyPastPathsOnDelay()
+    {
+        yield return new WaitForSeconds(1f);
+
+        if (!lastIsTownPart)
+        {
+            Destroy(lastPath);
+            townObject.SetActive(false);
+        }
+        else
+        {
+            lastIsTownPart = false;
+        }
+
+        Destroy(lastPath_LRAlternative);
     }
 }

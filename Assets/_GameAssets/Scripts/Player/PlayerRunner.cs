@@ -8,6 +8,8 @@ public class PlayerRunner : MonoBehaviour {
 
     public bool doMove = true;
 
+    public bool canTurn = false;
+
 	// Use this for initialization
 	void Start ()
     {
@@ -21,7 +23,7 @@ public class PlayerRunner : MonoBehaviour {
         {
             AutoRun();
         }
-
+        /*
         if (Input.GetButtonDown("Horizontal"))
         {
             float horizontalInput = Input.GetAxisRaw("Horizontal");
@@ -35,7 +37,7 @@ public class PlayerRunner : MonoBehaviour {
         {
             float gyroInput = Input.GetAxis("Vertical");
             TiltRunner(gyroInput);
-        }
+        }*/
 	}
 
     void AutoRun()
@@ -43,13 +45,45 @@ public class PlayerRunner : MonoBehaviour {
         transform.position += moveSpeed * Time.deltaTime * transform.forward;
     }
 
+    public void DoLeft()
+    {
+        if(canTurn)
+        {
+            TurnRunner(-1f);
+        }
+        else
+        {
+            LaneChangeRunner(-1);
+        }
+    }
+
+    public void DoRight()
+    {
+        if (canTurn)
+        {
+            TurnRunner(1f);
+        }
+        else
+        {
+            LaneChangeRunner(1);
+        }
+    }
+
     void TurnRunner(float inputDir)
     {
         transform.eulerAngles += new Vector3(0f, inputDir * 90f, 0f);
+        canTurn = false;
     }
 
+    void LaneChangeRunner(int direction)
+    {
+        transform.position += direction * 1.5f * transform.right;
+    }
+    
+    /*
     void TiltRunner(float inputDir)
     {
         transform.position += inputDir * Time.deltaTime * tiltSpeed * transform.right;
     }
+    */
 }
