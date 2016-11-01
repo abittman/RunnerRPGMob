@@ -180,12 +180,13 @@ public class PlayerSwipeInput : MonoBehaviour {
 
     void DoUpSwipeAction()
     {
-
+        pRunner.DoJump();
         eventSent = true;
     }
 
     void DoDownSwipeAction()
     {
+        pRunner.DoSlide();
         eventSent = true;
     }
 

@@ -1,7 +1,11 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
 using System.Collections;
 
 public class InteractionTrigger : MonoBehaviour {
+
+    public UnityEvent triggerEnterEvent;
+    public UnityEvent triggerExitEvent;
 
     public BuildingInteraction building;
 
@@ -9,7 +13,11 @@ public class InteractionTrigger : MonoBehaviour {
     {
         if(col.gameObject.tag == "Player")
         {
-            building.EnterInteraction();
+            if(triggerEnterEvent != null)
+            {
+                triggerEnterEvent.Invoke();
+            }
+            //building.EnterInteraction();
         }
     }
 
@@ -17,7 +25,11 @@ public class InteractionTrigger : MonoBehaviour {
     {
         if (col.gameObject.tag == "Player")
         {
-            building.ExitInteraction();
+            //building.ExitInteraction();
+            if(triggerExitEvent != null)
+            {
+                triggerExitEvent.Invoke();
+            }
         }
     }
 }

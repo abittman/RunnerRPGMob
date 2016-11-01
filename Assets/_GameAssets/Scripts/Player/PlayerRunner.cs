@@ -6,9 +6,13 @@ public class PlayerRunner : MonoBehaviour {
     public float moveSpeed = 10f;
     public float tiltSpeed = 1f;
 
+    public float jumpForce = 100f;
+
     public bool doMove = true;
 
     public bool canTurn = false;
+
+    public GameObject meshObject;
 
 	// Use this for initialization
 	void Start ()
@@ -86,4 +90,24 @@ public class PlayerRunner : MonoBehaviour {
         transform.position += inputDir * Time.deltaTime * tiltSpeed * transform.right;
     }
     */
+
+    public void DoJump()
+    {
+        JumpRunner();
+    }
+
+    void JumpRunner()
+    {
+        gameObject.GetComponent<Rigidbody>().AddForce(transform.up * jumpForce, ForceMode.Impulse);
+    }
+
+    public void DoSlide()
+    {
+        SlideRunner();
+    }
+
+    void SlideRunner()
+    {
+        //Setup an animation to handle this
+    }
 }
