@@ -3,6 +3,8 @@ using System.Collections;
 
 public class PlayerRunner : MonoBehaviour {
 
+    public Rigidbody playerRB;
+
     public float moveSpeed = 10f;
     public float tiltSpeed = 1f;
 
@@ -43,6 +45,13 @@ public class PlayerRunner : MonoBehaviour {
             TiltRunner(gyroInput);
         }*/
 	}
+
+    public void StopRunner()
+    {
+        doMove = false;
+        playerRB.isKinematic = true;
+        playerRB.useGravity = false;
+    }
 
     void AutoRun()
     {

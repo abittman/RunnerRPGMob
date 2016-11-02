@@ -14,7 +14,8 @@ public enum ResourceType
     None,
     Gold,
     Wood,
-    Stone
+    Stone,
+    Axe
 }
 
 public class ResourcesManager : MonoBehaviour {
