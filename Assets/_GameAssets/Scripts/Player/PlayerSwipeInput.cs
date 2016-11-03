@@ -25,7 +25,7 @@ public class PlayerSwipeInput : MonoBehaviour {
         swipeMinAmount = Screen.width / 15f;
         //float totalWidth = Screen.width * (1 / Screen.dpi);
         
-        canControl = true;
+        //canControl = true;
         delayTimer = delayForNextSwipe;
     }
 	
@@ -177,6 +177,16 @@ public class PlayerSwipeInput : MonoBehaviour {
             }
         }
 	}
+
+    public void ActivateControl()
+    {
+        canControl = true;
+    }
+
+    public void DeactivateControl()
+    {
+        canControl = false;
+    }
 
     void DoUpSwipeAction()
     {

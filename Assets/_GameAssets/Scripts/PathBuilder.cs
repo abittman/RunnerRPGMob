@@ -4,16 +4,16 @@ using System.Collections.Generic;
 
 public enum MoveDirection
 {
-    None,
-    North,
-    East,
-    South,
-    West
+    North = 1,
+    East = 2,
+    South = 3,
+    West = 4
 }
 
 public class PathBuilder : MonoBehaviour
 {
     public GameObject sectionObj;
+    public List<BuiltPathPiece> forestSectionPoolObjects = new List<BuiltPathPiece>();
 
     public MoveDirection currentMoveDirection;
 
@@ -24,11 +24,19 @@ public class PathBuilder : MonoBehaviour
     int pathLength = 5;
 
     bool lastIsTownPart = false;
+    /*
     public GameObject lastPath;
     public GameObject lastPath_LRAlternative;
     public GameObject currentPath;
     public GameObject nextLeftPath;
     public GameObject nextRightPath;
+    */
+
+    public BuiltPathPiece lastPathPiece;
+    public BuiltPathPiece lastPathPiece_LRAlternative;
+    public BuiltPathPiece currentPathPiece;
+    public BuiltPathPiece nextLeftPathPiece;
+    public BuiltPathPiece nextRightPathPiece;
 
     public Vector3 objectScale = new Vector3(8f, 0f, 50f);
     //Vector3 halvedScale;
@@ -54,16 +62,21 @@ public class PathBuilder : MonoBehaviour
         westAdd = new Vector3(-objectScale.z / 2f, 0f, -objectScale.x / 2f);
 
         currentPathProgress = 0;
+
+        DeactivateAllPoolPieces();
     }
 	
-	// Update is called once per frame
-	void Update () {
-	
-	}
-
-    public void CreateNextPath(GameObject currentPosObjRef)
+	void DeactivateAllPoolPieces()
     {
-        Debug.Log("Create next path at " + currentPosObjRef.name);
+        for(int i = 0; i<forestSectionPoolObjects.Count; i++)
+        {
+            forestSectionPoolObjects[i].DeactivateToPool();
+        }
+    }
+
+    public void CreateNextPath(BuiltPathPiece currentPathPieceRef)
+    {
+        Debug.Log("Create next path at " + currentPathPieceRef.gameObject.name);
         bool tookLeft = false;
         bool tookRight = false;
         
@@ -78,24 +91,26 @@ public class PathBuilder : MonoBehaviour
         {
             Debug.Log("Next on path");
 
-            lastPath = currentPath;
+            lastPathPiece = currentPathPiece;
 
-            currentPath = currentPosObjRef;
+            currentPathPiece = currentPathPieceRef;
 
-            if (currentPath == nextLeftPath)
+            if (currentPathPiece == nextLeftPathPiece)
             {
-                lastPath_LRAlternative = nextRightPath;
+                lastPathPiece_LRAlternative = nextRightPathPiece;
+                nextRightPathPiece = null;
                 tookLeft = true;
             }
-            else if (currentPath == nextRightPath)
+            else if (currentPathPiece == nextRightPathPiece)
             {
-                lastPath_LRAlternative = nextLeftPath;
+                lastPathPiece_LRAlternative = nextLeftPathPiece;
+                nextLeftPathPiece = null;
                 tookRight = true;
             }
 
-            StartCoroutine(DestroyPastPathsOnDelay());
+            StartCoroutine(DeactivatePastPathsOnDelay());
 
-            currentPos = currentPath.transform.position;
+            currentPos = currentPathPiece.transform.position;
             endLocation = currentPos;
 
             switch (currentMoveDirection)
@@ -193,7 +208,7 @@ public class PathBuilder : MonoBehaviour
         else
         {
             Debug.Log("First path");
-            currentPos = currentPath.transform.position;
+            currentPos = currentPathPiece.transform.position;
             endLocation = currentPos;
 
             switch (currentMoveDirection)
@@ -238,22 +253,12 @@ public class PathBuilder : MonoBehaviour
 
         if (currentPathProgress < pathLength)
         {
-            //Spawn left path
-            GameObject leftG = Instantiate(sectionObj, transform) as GameObject;
-            //Debug.Log("Left path at " + nextLeftLocation + " | " + nextLeftEulerRotation);
-            leftG.transform.position = nextLeftLocation;
-            leftG.transform.eulerAngles = nextLeftEulerRotation;
-            leftG.GetComponentInChildren<PathTriggerArea>().pathBuilder = this;
-            nextLeftPath = leftG;
+            //Randomise selection of path piece
+            nextLeftPathPiece = RandomiseNextPathPiece();
+            nextLeftPathPiece.ActivateFromPool(nextLeftLocation, nextLeftEulerRotation);
 
-            //Spawn right path
-            GameObject rightG = Instantiate(sectionObj, transform) as GameObject;
-            //Debug.Log("Right path at " + nextRightLocation + " | " + nextRightEulerRotation);
-
-            rightG.transform.position = nextRightLocation;
-            rightG.transform.eulerAngles = nextRightEulerRotation;
-            rightG.GetComponentInChildren<PathTriggerArea>().pathBuilder = this;
-            nextRightPath = rightG;
+            nextRightPathPiece = RandomiseNextPathPiece();
+            nextRightPathPiece.ActivateFromPool(nextRightLocation, nextRightEulerRotation);
 
             currentPathProgress++;
         }
@@ -264,37 +269,63 @@ public class PathBuilder : MonoBehaviour
         }
     }
 
-    public void PathStarted(GameObject startPathRef, MoveDirection moveDirection)
+    public void PathStarted(BuiltPathPiece startPathPieceRef, MoveDirection moveDirection)
     {
         Debug.Log("Start path at direction " + moveDirection);
         lastIsTownPart = true;
-        currentPath = startPathRef;
+        currentPathPiece = startPathPieceRef;
         currentMoveDirection = moveDirection;
 
         int randomLength = Random.Range(minPathLength, maxPathLength + 1);
         pathLength = randomLength;
     }
 
-    IEnumerator DestroyPastPathsOnDelay()
+    IEnumerator DeactivatePastPathsOnDelay()
     {
         yield return new WaitForSeconds(1f);
 
         if (!lastIsTownPart && currentPathProgress > 0)
         {
-            Destroy(lastPath);
-            townObject.SetActive(false);
+            lastPathPiece.DeactivateToPool();
         }
         else
         {
+            townObject.SetActive(false);
             lastIsTownPart = false;
         }
 
-        Destroy(lastPath_LRAlternative);
+        lastPathPiece_LRAlternative.DeactivateToPool();
+    }
+
+    BuiltPathPiece RandomiseNextPathPiece()
+    {
+        BuiltPathPiece nextPathPiece = null;
+
+        bool newPiece = false;
+        do
+        {
+            //Randomise number - more to do with this calculation some other time
+            int randomR = Random.Range(0, forestSectionPoolObjects.Count);
+
+            //Check it was not a piece previously/recently used
+            if(forestSectionPoolObjects[randomR] != currentPathPiece
+                && forestSectionPoolObjects[randomR] != lastPathPiece
+                && forestSectionPoolObjects[randomR] != lastPathPiece_LRAlternative
+                && forestSectionPoolObjects[randomR] != nextRightPathPiece
+                && forestSectionPoolObjects[randomR] != nextLeftPathPiece)
+            {
+                newPiece = true;
+                nextPathPiece = forestSectionPoolObjects[randomR];
+            }
+
+        } while (newPiece == false);
+
+        return nextPathPiece;
     }
 
     void ResetTown(Vector3 pathEndLocation)
     {
-        //Debug.Log("Reset town");
+        Debug.Log("Reset town coming in from " + exitOrientation);
         //Current move direction
         Vector3 townToExitOffset = Vector3.zero;
 
@@ -343,7 +374,7 @@ public class PathBuilder : MonoBehaviour
                     moveEnumToInt = (int)entrancePathAreas[i].thisMoveDirection + 1;
                     if(moveEnumToInt > 4)
                     {
-                        moveEnumToInt -= 3;
+                        moveEnumToInt -= 4;
                     }
                     entrancePathAreas[i].thisMoveDirection = (MoveDirection)moveEnumToInt;
                     break;
@@ -351,7 +382,7 @@ public class PathBuilder : MonoBehaviour
                     moveEnumToInt = (int)entrancePathAreas[i].thisMoveDirection + 2;
                     if (moveEnumToInt > 4)
                     {
-                        moveEnumToInt -= 3;
+                        moveEnumToInt -= 4;
                     }
                     entrancePathAreas[i].thisMoveDirection = (MoveDirection)moveEnumToInt;
                     break;
@@ -360,7 +391,7 @@ public class PathBuilder : MonoBehaviour
                     moveEnumToInt = (int)entrancePathAreas[i].thisMoveDirection + 3;
                     if (moveEnumToInt > 4)
                     {
-                        moveEnumToInt -= 3;
+                        moveEnumToInt -= 4;
                     }
                     entrancePathAreas[i].thisMoveDirection = (MoveDirection)moveEnumToInt;
                     break;

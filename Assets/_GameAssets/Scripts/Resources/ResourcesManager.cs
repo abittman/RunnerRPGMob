@@ -45,7 +45,7 @@ public class ResourcesManager : MonoBehaviour {
 
     public void SpendResource(ResourceType typeToAdd, int removeAmount)
     {
-        allResources.Find(x => x.resourceType == typeToAdd).resourceVal += removeAmount;
+        allResources.Find(x => x.resourceType == typeToAdd).resourceVal -= removeAmount;
 
         UpdateUI();
     }

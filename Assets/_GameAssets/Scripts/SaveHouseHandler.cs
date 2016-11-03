@@ -12,21 +12,21 @@ public class SaveHouseHandler : MonoBehaviour {
 
     public void EnteringHouse()
     {
-        pInput.canControl = false;
+        pInput.DeactivateControl();
         saveUIObj.SetActive(true);
     }
 
     public void InHouse()
     {
-        pRunner.doMove = false;
+        pRunner.StopRunner();
         pRunner.gameObject.transform.eulerAngles += new Vector3(0f, 180f, 0f);
     }
 
     public void ExitingHouse()
     {
         progressMan.SaveProgress();
-        pRunner.doMove = true;
-        pInput.canControl = true;
+        pRunner.StartRunner();
+        pInput.ActivateControl();
         saveUIObj.SetActive(false);
     }
 }

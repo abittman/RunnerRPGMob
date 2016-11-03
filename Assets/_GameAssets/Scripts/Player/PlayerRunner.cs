@@ -53,6 +53,14 @@ public class PlayerRunner : MonoBehaviour {
         playerRB.useGravity = false;
     }
 
+    public void StartRunner()
+    {
+        doMove = true;
+
+        playerRB.isKinematic = false;
+        playerRB.useGravity = true;
+    }
+
     void AutoRun()
     {
         transform.position += moveSpeed * Time.deltaTime * transform.forward;

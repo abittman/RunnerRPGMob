@@ -21,7 +21,7 @@ public class PlayerStatus : MonoBehaviour {
     public void PlayerRunFails()
     {
         pRunner.StopRunner();
-        pInput.canControl = false;
+        pInput.DeactivateControl();
         gameOverMan.DoGameOver();
     }
 

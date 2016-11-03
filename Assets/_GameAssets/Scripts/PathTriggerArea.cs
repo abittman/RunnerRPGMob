@@ -3,6 +3,7 @@ using System.Collections;
 
 public class PathTriggerArea : MonoBehaviour {
 
+    public BuiltPathPiece parentPathPiece;
     public PathBuilder pathBuilder;
     public MoveDirection thisMoveDirection;
 
@@ -22,10 +23,10 @@ public class PathTriggerArea : MonoBehaviour {
         {
             if(pathBuilder.currentPathProgress == 0)
             {
-                pathBuilder.PathStarted(transform.parent.parent.gameObject, thisMoveDirection);
+                pathBuilder.PathStarted(parentPathPiece, thisMoveDirection);
             }
 
-            pathBuilder.CreateNextPath(transform.parent.parent.gameObject);
+            pathBuilder.CreateNextPath(parentPathPiece);
         }
     }
 }
