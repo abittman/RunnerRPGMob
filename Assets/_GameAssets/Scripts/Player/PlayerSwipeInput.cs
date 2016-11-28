@@ -114,6 +114,23 @@ public class PlayerSwipeInput : MonoBehaviour {
             }
             else if (Application.isEditor)
             {
+                if(Input.GetKeyDown(KeyCode.A))
+                {
+                    DoLeftSwipeAction();
+                }
+                else if(Input.GetKeyDown(KeyCode.D))
+                {
+                    DoRightSwipeAction();
+                }
+                else if(Input.GetKeyDown(KeyCode.W))
+                {
+                    DoUpSwipeAction();
+                }
+                else if(Input.GetKeyDown(KeyCode.S))
+                {
+                    DoDownSwipeAction();
+                }
+
                 if (Input.GetMouseButton(0))
                 {
                     Vector2 currentMousePos = new Vector2(Input.mousePosition.x, Input.mousePosition.y);

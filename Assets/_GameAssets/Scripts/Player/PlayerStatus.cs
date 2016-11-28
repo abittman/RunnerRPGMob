@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class PlayerStatus : MonoBehaviour {
 
@@ -8,13 +9,15 @@ public class PlayerStatus : MonoBehaviour {
     public PlayerSwipeInput pInput;
     public GameOverManager gameOverMan;
 
-    public int maxHealth = 100;
-    public int currentHealth = 100;
+    public float maxHealth = 100f;
+    public float currentHealth = 100f;
+    public Image healthbarImage;
 
 	// Use this for initialization
 	void Start ()
     {
         currentHealth = maxHealth;
+        healthbarImage.fillAmount = currentHealth / maxHealth;
 	}
 
     //For when the player hits an obstacle or falls
@@ -28,14 +31,15 @@ public class PlayerStatus : MonoBehaviour {
     //For when the player dies from loss of health
     public void DoPlayerDeath()
     {
-
+        PlayerRunFails();
     }
 
-    public void DamageHealth(int damageAmount)
+    public void DamageHealth(float damageAmount)
     {
         currentHealth -= damageAmount;
+        healthbarImage.fillAmount = currentHealth / maxHealth;
 
-        if(currentHealth <= 0)
+        if (currentHealth <= 0)
         {
             DoPlayerDeath();
         }

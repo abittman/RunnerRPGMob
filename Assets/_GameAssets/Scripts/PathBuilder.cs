@@ -53,6 +53,8 @@ public class PathBuilder : MonoBehaviour
 
     public List<PathTriggerArea> entrancePathAreas = new List<PathTriggerArea>();
 
+    MoveDirection lastTownDirection = MoveDirection.North;
+
 	// Use this for initialization
 	void Start ()
     {
@@ -256,9 +258,11 @@ public class PathBuilder : MonoBehaviour
             //Randomise selection of path piece
             nextLeftPathPiece = RandomiseNextPathPiece();
             nextLeftPathPiece.ActivateFromPool(nextLeftLocation, nextLeftEulerRotation);
+            currentPathPiece.connectedTriggerArea.proceduralConnectedPieces.Add(nextLeftPathPiece.connectedPathPiece);
 
             nextRightPathPiece = RandomiseNextPathPiece();
             nextRightPathPiece.ActivateFromPool(nextRightLocation, nextRightEulerRotation);
+            currentPathPiece.connectedTriggerArea.proceduralConnectedPieces.Add(nextRightPathPiece.connectedPathPiece);
 
             currentPathProgress++;
         }
@@ -288,7 +292,7 @@ public class PathBuilder : MonoBehaviour
         {
             lastPathPiece.DeactivateToPool();
         }
-        else
+        else if(lastIsTownPart)
         {
             townObject.SetActive(false);
             lastIsTownPart = false;
@@ -329,6 +333,8 @@ public class PathBuilder : MonoBehaviour
         //Current move direction
         Vector3 townToExitOffset = Vector3.zero;
 
+        MoveDirection townOrientation = MoveDirection.North;
+
         float rotAmount = 0f;
         switch(exitOrientation)
         {
@@ -361,42 +367,48 @@ public class PathBuilder : MonoBehaviour
                 break;
         }
 
-        for(int i = 0; i<entrancePathAreas.Count; i++)
+        if(townObject.transform.eulerAngles.y == 0f)
+        {
+            townOrientation = MoveDirection.North;
+        }
+        else if(townObject.transform.eulerAngles.y == 90f)
+        {
+            townOrientation = MoveDirection.East;
+        }
+        else if(townObject.transform.eulerAngles.y == 180f)
+        {
+            townOrientation = MoveDirection.South;
+        }
+        else if(townObject.transform.eulerAngles.y == 270f)
+        {
+            townOrientation = MoveDirection.West;
+        }
+
+        int townRotationDiff = (int)townOrientation - (int)lastTownDirection;
+        if (townRotationDiff < 1)
+        {
+            townRotationDiff += 4;
+        }
+
+        for (int i = 0; i<entrancePathAreas.Count; i++)
         {
             int moveEnumToInt = 0;
 
-            switch (exitOrientation)
+            moveEnumToInt = (int)entrancePathAreas[i].thisMoveDirection + townRotationDiff;
+            if(moveEnumToInt > 4)
             {
-                case MoveDirection.North:
-                    //Do nothing
-                    break;
-                case MoveDirection.East:
-                    moveEnumToInt = (int)entrancePathAreas[i].thisMoveDirection + 1;
-                    if(moveEnumToInt > 4)
-                    {
-                        moveEnumToInt -= 4;
-                    }
-                    entrancePathAreas[i].thisMoveDirection = (MoveDirection)moveEnumToInt;
-                    break;
-                case MoveDirection.South:
-                    moveEnumToInt = (int)entrancePathAreas[i].thisMoveDirection + 2;
-                    if (moveEnumToInt > 4)
-                    {
-                        moveEnumToInt -= 4;
-                    }
-                    entrancePathAreas[i].thisMoveDirection = (MoveDirection)moveEnumToInt;
-                    break;
-
-                case MoveDirection.West:
-                    moveEnumToInt = (int)entrancePathAreas[i].thisMoveDirection + 3;
-                    if (moveEnumToInt > 4)
-                    {
-                        moveEnumToInt -= 4;
-                    }
-                    entrancePathAreas[i].thisMoveDirection = (MoveDirection)moveEnumToInt;
-                    break;
+                moveEnumToInt -= 4;
             }
+            else if(moveEnumToInt < 1)
+            {
+                moveEnumToInt += 4;
+            }
+            entrancePathAreas[i].thisMoveDirection = (MoveDirection)moveEnumToInt;
+
+            Debug.Log("Exit " + entrancePathAreas[i].parentPathPiece.name + " becomes " + entrancePathAreas[i].thisMoveDirection);
         }
+
+        lastTownDirection = townOrientation;
 
         townToExitOffset = townReturnPoint.position - townObject.transform.position;
 
