@@ -5,6 +5,7 @@ public class PlayerCombat : MonoBehaviour {
 
     public PlayerStatus pStatus;
     public PlayerRunner pRunner;
+    public PlayerAnimationController pAniController;
 
     public EnemyCombat leftEnemy;
     public EnemyCombat rightEnemy;
@@ -33,16 +34,27 @@ public class PlayerCombat : MonoBehaviour {
 
     public void DoRightAttack()
     {
+        if (rightEnemy != null)
+        {
+            rightEnemy.eStatus.DamageEnemy(attackStrength);
+        }
 
     }
 
     public void DoJumpAttack()
     {
-
+        if (jumpEnemy != null)
+        {
+            jumpEnemy.eStatus.DamageEnemy(attackStrength);
+        }
     }
 
     public void DoSlideAttack()
     {
+        if (slideEnemy != null)
+        {
+            slideEnemy.eStatus.DamageEnemy(attackStrength);
+        }
 
     }
 }

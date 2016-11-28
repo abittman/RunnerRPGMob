@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
 public class PathPiece : MonoBehaviour {
     
@@ -9,6 +9,8 @@ public class PathPiece : MonoBehaviour {
 
     public bool isTownPiece = false;
     public Transform centrePositionObject;
+
+    public List<ItemPickup> allItems = new List<ItemPickup>();
 
     // Use this for initialization
     void Start () {
@@ -71,6 +73,11 @@ public class PathPiece : MonoBehaviour {
                     alternateFacingDirection = MoveDirection.South;
                     break;
             }
+        }
+
+        for(int i = 0; i<allItems.Count; i++)
+        {
+            allItems[i].ActivatePickup();
         }
     }
 

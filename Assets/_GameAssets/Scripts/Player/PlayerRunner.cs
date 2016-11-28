@@ -21,6 +21,8 @@ public enum RunningLane
 public class PlayerRunner : MonoBehaviour {
 
     public PlayerCombat pCombat;
+    public PlayerAnimationController pAniController;
+
     public Rigidbody playerRB;
 
     public float moveSpeed = 10f;
@@ -58,6 +60,11 @@ public class PlayerRunner : MonoBehaviour {
     public Vector3 nextLeftMidPos;
     public Vector3 nextRightMidPos;
 
+    //Sliding
+    bool doSliding = false;
+    public float slideTimer = 1f;
+    float currentSlideTimer = 0f;
+
 	// Use this for initialization
 	void Start ()
     {
@@ -79,6 +86,16 @@ public class PlayerRunner : MonoBehaviour {
             if(doBumpBack)
             {
                 BumpBackRunner();
+            }
+            if(doSliding)
+            {
+                currentSlideTimer += Time.deltaTime;
+                if(currentSlideTimer >= slideTimer)
+                {
+                    currentSlideTimer = 0f;
+                    doSliding = false;
+                    pAniController.StraightRunAnimation();
+                }
             }
         }
 	}
@@ -106,6 +123,10 @@ public class PlayerRunner : MonoBehaviour {
         if (Physics.Raycast(transform.position, Vector3.down, out hit, 2.5f, groundingMask))
         {
             //Is grounded
+            if(isGrounded == false)
+            {
+                pAniController.StraightRunAnimation();
+            }
             isGrounded = true;
         }
         else
@@ -150,6 +171,8 @@ public class PlayerRunner : MonoBehaviour {
 
                 if (doLaneChange)
                 {
+                    pAniController.LeftLaneChangeAnimation();
+
                     switch (currentMoveDirection)
                     {
                         case MoveDirection.North:
@@ -243,6 +266,7 @@ public class PlayerRunner : MonoBehaviour {
 
                 if (doLaneChange)
                 {
+                    pAniController.RightLaneChangeAnimation();
                     switch (currentMoveDirection)
                     {
                         case MoveDirection.North:
@@ -454,7 +478,7 @@ public class PlayerRunner : MonoBehaviour {
                         }
                         else
                         {
-                            currentPos.z = nextRightMidPos.x;
+                            currentPos.z = nextRightMidPos.z;
                             currentLane = RunningLane.Mid;
                         }
                     }
@@ -558,7 +582,7 @@ public class PlayerRunner : MonoBehaviour {
                         }
                         else
                         {
-                            currentPos.z = nextRightMidPos.x;
+                            currentPos.z = nextRightMidPos.z;
                             currentLane = RunningLane.Mid;
                         }
                     }
@@ -591,6 +615,7 @@ public class PlayerRunner : MonoBehaviour {
         {
             doLaneChange = false;
             laneChangeTimer = 0f;
+            pAniController.StraightRunAnimation();
         }
     }
 
@@ -605,16 +630,32 @@ public class PlayerRunner : MonoBehaviour {
     void JumpRunner()
     {
         gameObject.GetComponent<Rigidbody>().AddForce(transform.up * jumpForce, ForceMode.Impulse);
+        if(pCombat.jumpEnemy != null)
+        {
+            pCombat.DoJumpAttack();
+        }
+        pAniController.JumpAnimation();
+
+        doSliding = false;
     }
 
     public void DoSlide()
     {
-        SlideRunner();
+        if (isGrounded)
+        {
+            SlideRunner();
+            if(pCombat.slideEnemy != null)
+            {
+                pCombat.DoSlideAttack();
+            }
+        }
     }
 
     void SlideRunner()
     {
         //Setup an animation to handle this
+        doSliding = true;
+        pAniController.SlideAnimation();
     }
 
     public void DoBumpLeft()

@@ -15,6 +15,9 @@ public class EnemyCombat : MonoBehaviour {
     bool combatStarted = false;
     bool canAttack = false;
 
+    public bool attacksOnSides = true;
+    public bool attacksOnSameLane = false;
+
 	// Use this for initialization
 	void Start () {
 	
@@ -38,46 +41,64 @@ public class EnemyCombat : MonoBehaviour {
 
     void CheckPlayerProximity()
     {
-        switch(thisEnemyMover.thisEnemyRunningLane)
+        if (attacksOnSides)
         {
-            case RunningLane.Left:
-                if(pCombat.pRunner.currentLane == RunningLane.Mid)
+            switch (thisEnemyMover.thisEnemyRunningLane)
+            {
+                case RunningLane.Left:
+                    if (pCombat.pRunner.currentLane == RunningLane.Mid)
+                    {
+                        EnemyInCombat();
+                        pCombat.leftEnemy = this;
+                    }
+                    else
+                    {
+                        EnemyOutOfCombat();
+                    }
+                    break;
+                case RunningLane.Mid:
+                    if (pCombat.pRunner.currentLane == RunningLane.Left)
+                    {
+                        EnemyInCombat();
+                        pCombat.rightEnemy = this;
+                    }
+                    else if (pCombat.pRunner.currentLane == RunningLane.Right)
+                    {
+                        EnemyInCombat();
+                        pCombat.leftEnemy = this;
+                    }
+                    else
+                    {
+                        EnemyOutOfCombat();
+                    }
+                    break;
+                case RunningLane.Right:
+                    if (pCombat.pRunner.currentLane == RunningLane.Mid)
+                    {
+                        EnemyInCombat();
+                        pCombat.rightEnemy = this;
+                    }
+                    else
+                    {
+                        EnemyOutOfCombat();
+                    }
+                    break;
+            }
+        }
+        else if(attacksOnSameLane)
+        {
+            if(thisEnemyMover.thisEnemyRunningLane == pCombat.pRunner.currentLane)
+            {
+                EnemyInCombat();
+                if(thisEnemyMover.isFlying)
                 {
-                    EnemyInCombat();
-                    pCombat.leftEnemy = this;
+                    pCombat.jumpEnemy = this;
                 }
                 else
                 {
-                    EnemyOutOfCombat();
+                    pCombat.slideEnemy = this;
                 }
-                break;
-            case RunningLane.Mid:
-                if (pCombat.pRunner.currentLane == RunningLane.Left)
-                {
-                    EnemyInCombat();
-                    pCombat.rightEnemy = this;
-                }
-                else if (pCombat.pRunner.currentLane == RunningLane.Right)
-                {
-                    EnemyInCombat();
-                    pCombat.leftEnemy = this;
-                }
-                else
-                {
-                    EnemyOutOfCombat();
-                }
-                break;
-            case RunningLane.Right:
-                if (pCombat.pRunner.currentLane == RunningLane.Mid)
-                {
-                    EnemyInCombat();
-                    pCombat.rightEnemy = this;
-                }
-                else
-                {
-                    EnemyOutOfCombat();
-                }
-                break;
+            }
         }
     }
 
@@ -102,6 +123,14 @@ public class EnemyCombat : MonoBehaviour {
         else if(pCombat.rightEnemy == this)
         {
             pCombat.rightEnemy = null;
+        }
+        else if(pCombat.jumpEnemy == this)
+        {
+            pCombat.jumpEnemy = null;
+        }
+        else if(pCombat.slideEnemy == this)
+        {
+            pCombat.slideEnemy = null;
         }
     }
 

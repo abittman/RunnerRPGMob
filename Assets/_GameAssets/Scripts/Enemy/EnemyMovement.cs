@@ -12,6 +12,8 @@ public class EnemyMovement : MonoBehaviour {
 
     public bool canMove = false;
 
+    public bool isFlying = false;
+
 	// Use this for initialization
 	void Start ()
     {
