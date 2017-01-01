@@ -3,12 +3,15 @@ using System.Collections;
 
 public class EnemyMovement : MonoBehaviour {
 
-    public PlayerRunner pRunner;
-    public EnemyCombat eCombat;
+    public EnemyBehaviour eBehaviour;
+
+    public bool isStationary = false;
+    public bool laneChangeWithPlayer = false;
 
     float moveSpeed;
     MoveDirection enemyMoveDirection;
     public RunningLane thisEnemyRunningLane;
+    Vector3 centreLanePos;
 
     public bool canMove = false;
 
@@ -17,26 +20,112 @@ public class EnemyMovement : MonoBehaviour {
 	// Use this for initialization
 	void Start ()
     {
-        moveSpeed = pRunner.moveSpeed;
+        if (!isStationary)
+        {
+            moveSpeed = eBehaviour.pRunner.moveSpeed;
+        }
+        else
+        {
+            moveSpeed = 0f;
+        }
 	}
+
+    public void ResetEnemyMovement()
+    {
+        canMove = false;
+    }
 	
 	// Update is called once per frame
 	void Update ()
     {
-	    if(canMove)
+	    if(canMove
+            && !isStationary)
         {
-            MoveEnemy();
+            MoveEnemy_Forward();
         }
 	}
 
-    void MoveEnemy()
+    void MoveEnemy_Forward()
     {
         transform.position += moveSpeed * Time.deltaTime * transform.forward;
     }
 
-    public void SetupEnemy(PathPiece startingPathPiece)
+    public void EnemySwapLanes(RunningLane newLane)
     {
-        enemyMoveDirection = startingPathPiece.pieceFacingDirection;
+        Debug.Log("Enemy Swap Lanes");
+        //If same as before
+        if(newLane == thisEnemyRunningLane)
+        {
+            return;
+        }
+        else
+        {
+            thisEnemyRunningLane = newLane;
+            Vector3 newPosition = transform.position;
+
+            switch(thisEnemyRunningLane)
+            {
+                case RunningLane.Left:
+                    switch(enemyMoveDirection)
+                    {
+                        case MoveDirection.North:
+                            newPosition.x = centreLanePos.x - 2f;
+                            break;
+                        case MoveDirection.East:
+                            newPosition.z = centreLanePos.z + 2f;
+                            break;
+                        case MoveDirection.South:
+                            newPosition.x = centreLanePos.x + 2f;
+                            break;
+                        case MoveDirection.West:
+                            newPosition.z = centreLanePos.z - 2f;
+                            break;
+                    }
+                    break;
+                case RunningLane.Mid:
+                    switch (enemyMoveDirection)
+                    {
+                        case MoveDirection.North:
+                            newPosition.x = centreLanePos.x;
+                            break;
+                        case MoveDirection.East:
+                            newPosition.z = centreLanePos.z;
+                            break;
+                        case MoveDirection.South:
+                            newPosition.x = centreLanePos.x;
+                            break;
+                        case MoveDirection.West:
+                            newPosition.z = centreLanePos.z;
+                            break;
+                    }
+                    break;
+                case RunningLane.Right:
+                    switch (enemyMoveDirection)
+                    {
+                        case MoveDirection.North:
+                            newPosition.x = centreLanePos.x + 2f;
+                            break;
+                        case MoveDirection.East:
+                            newPosition.z = centreLanePos.z - 2f;
+                            break;
+                        case MoveDirection.South:
+                            newPosition.x = centreLanePos.x - 2f;
+                            break;
+                        case MoveDirection.West:
+                            newPosition.z = centreLanePos.z + 2f;
+                            break;
+                    }
+                    break;
+            }
+
+            transform.position = newPosition;
+        }
+    }
+
+    public void SetupEnemy(BuiltPathPiece startingPathPiece)
+    {
+        enemyMoveDirection = startingPathPiece.intendedMoveDirection;
+        centreLanePos = startingPathPiece.transform.position;
 
         switch(enemyMoveDirection)
         {
@@ -58,8 +147,6 @@ public class EnemyMovement : MonoBehaviour {
     public void StartMovingEnemy()
     {
         canMove = true;
-
-        eCombat.PrepareEnemyCombat();
     }
 
     public void StopMovingEnemy()

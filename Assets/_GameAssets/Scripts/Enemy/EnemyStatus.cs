@@ -34,4 +34,9 @@ public class EnemyStatus : MonoBehaviour {
         eCombat.EnemyOutOfCombat();
         gameObject.SetActive(false);
     }
+
+    public void ResetEnemyStatus()
+    {
+        currentHealth = maxHealth;
+    }
 }

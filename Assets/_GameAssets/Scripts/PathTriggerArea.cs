@@ -21,11 +21,6 @@ public class PathTriggerArea : MonoBehaviour {
     {
         if(col.gameObject.tag == "Player")
         {
-            if(pathBuilder.currentPathProgress == 0)
-            {
-                pathBuilder.PathStarted(parentPathPiece, thisMoveDirection);
-            }
-
             pathBuilder.CreateNextPath(parentPathPiece);
         }
     }

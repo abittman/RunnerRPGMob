@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 /*
 public enum MoveDirection
 {
@@ -20,6 +20,10 @@ public enum RunningLane
 
 public class PlayerRunner : MonoBehaviour {
 
+    [Header("References")]
+    public PlayerEventHandler pEventHandler;
+
+    [Space]
     public PlayerCombat pCombat;
     public PlayerAnimationController pAniController;
 
@@ -29,6 +33,7 @@ public class PlayerRunner : MonoBehaviour {
     public float tiltSpeed = 1f;
 
     public float jumpForce = 100f;
+    public float slideAirDownForce = 100f;
 
     public bool doMove = true;
 
@@ -133,6 +138,12 @@ public class PlayerRunner : MonoBehaviour {
         {
             isGrounded = false;
         }
+
+        //Check if attacking ahead
+        if(pCombat.CanDoFrontAttack())
+        {
+            pCombat.DoFrontAttack();
+        }
     }
 
     public void DoLeft()
@@ -143,89 +154,82 @@ public class PlayerRunner : MonoBehaviour {
         }
         else
         {
-            if (pCombat.leftEnemy != null)
-            {
-                doLaneChange = false;
-                pCombat.DoLeftAttack();
-            }
-            else
-            {
-                //Clear right enemy as you move away
-                pCombat.rightEnemy = null;
+            //Clear right enemy as you move away
+            //pCombat.rightEnemy = null;
 
-                RunningLane lastLane = currentLane;
-                switch (currentLane)
+            RunningLane lastLane = currentLane;
+            switch (currentLane)
+            {
+                case RunningLane.Left:
+                    doLaneChange = false;
+                    break;
+                case RunningLane.Mid:
+                    currentLane = RunningLane.Left;
+                    doLaneChange = true;
+                    break;
+                case RunningLane.Right:
+                    currentLane = RunningLane.Mid;
+                    doLaneChange = true;
+                    break;
+            }
+
+            if (doLaneChange)
+            {
+                pAniController.LeftLaneChangeAnimation();
+
+                switch (currentMoveDirection)
                 {
-                    case RunningLane.Left:
-                        doLaneChange = false;
+                    case MoveDirection.North:
+                        switch (lastLane)
+                        {
+                            case RunningLane.Mid:
+                                startX = currentMidLanePos.x;
+                                break;
+                            case RunningLane.Right:
+                                startX = currentMidLanePos.x + laneChangeDistance;
+                                break;
+                        }
+                        goalX = startX - laneChangeDistance;
                         break;
-                    case RunningLane.Mid:
-                        currentLane = RunningLane.Left;
-                        doLaneChange = true;
+                    case MoveDirection.South:
+                        switch (lastLane)
+                        {
+                            case RunningLane.Mid:
+                                startX = currentMidLanePos.x;
+                                break;
+                            case RunningLane.Right:
+                                startX = currentMidLanePos.x - laneChangeDistance;
+                                break;
+                        }
+                        goalX = startX + laneChangeDistance;
                         break;
-                    case RunningLane.Right:
-                        currentLane = RunningLane.Mid;
-                        doLaneChange = true;
+                    case MoveDirection.West:
+                        switch (lastLane)
+                        {
+                            case RunningLane.Mid:
+                                startZ = currentMidLanePos.z;
+                                break;
+                            case RunningLane.Right:
+                                startZ = currentMidLanePos.z + laneChangeDistance;
+                                break;
+                        }
+                        goalZ = startZ - laneChangeDistance;
+                        break;
+                    case MoveDirection.East:
+                        switch (lastLane)
+                        {
+                            case RunningLane.Mid:
+                                startZ = currentMidLanePos.z;
+                                break;
+                            case RunningLane.Right:
+                                startZ = currentMidLanePos.z - laneChangeDistance;
+                                break;
+                        }
+                        goalZ = startZ + laneChangeDistance;
                         break;
                 }
-
-                if (doLaneChange)
-                {
-                    pAniController.LeftLaneChangeAnimation();
-
-                    switch (currentMoveDirection)
-                    {
-                        case MoveDirection.North:
-                            switch (lastLane)
-                            {
-                                case RunningLane.Mid:
-                                    startX = currentMidLanePos.x;
-                                    break;
-                                case RunningLane.Right:
-                                    startX = currentMidLanePos.x + laneChangeDistance;
-                                    break;
-                            }
-                            goalX = startX - laneChangeDistance;
-                            break;
-                        case MoveDirection.South:
-                            switch (lastLane)
-                            {
-                                case RunningLane.Mid:
-                                    startX = currentMidLanePos.x;
-                                    break;
-                                case RunningLane.Right:
-                                    startX = currentMidLanePos.x - laneChangeDistance;
-                                    break;
-                            }
-                            goalX = startX + laneChangeDistance;
-                            break;
-                        case MoveDirection.West:
-                            switch (lastLane)
-                            {
-                                case RunningLane.Mid:
-                                    startZ = currentMidLanePos.z;
-                                    break;
-                                case RunningLane.Right:
-                                    startZ = currentMidLanePos.z + laneChangeDistance;
-                                    break;
-                            }
-                            goalZ = startZ - laneChangeDistance;
-                            break;
-                        case MoveDirection.East:
-                            switch (lastLane)
-                            {
-                                case RunningLane.Mid:
-                                    startZ = currentMidLanePos.z;
-                                    break;
-                                case RunningLane.Right:
-                                    startZ = currentMidLanePos.z - laneChangeDistance;
-                                    break;
-                            }
-                            goalZ = startZ + laneChangeDistance;
-                            break;
-                    }
-                }
             }
+            
         }
     }
 
@@ -237,15 +241,8 @@ public class PlayerRunner : MonoBehaviour {
         }
         else
         {
-            if(pCombat.rightEnemy != null)
-            {
-                doLaneChange = false;
-                pCombat.DoRightAttack();
-            }
-            else
-            {
+            
                 //Clear left Enemy as you move away
-                pCombat.leftEnemy = null;
 
                 RunningLane lastLane = currentLane;
 
@@ -264,62 +261,62 @@ public class PlayerRunner : MonoBehaviour {
                         break;
                 }
 
-                if (doLaneChange)
+            if (doLaneChange)
+            {
+                pAniController.RightLaneChangeAnimation();
+                switch (currentMoveDirection)
                 {
-                    pAniController.RightLaneChangeAnimation();
-                    switch (currentMoveDirection)
-                    {
-                        case MoveDirection.North:
-                            switch (lastLane)
-                            {
-                                case RunningLane.Mid:
-                                    startX = currentMidLanePos.x;
-                                    break;
-                                case RunningLane.Left:
-                                    startX = currentMidLanePos.x - laneChangeDistance;
-                                    break;
-                            }
-                            goalX = startX + laneChangeDistance;
-                            break;
-                        case MoveDirection.South:
-                            switch (lastLane)
-                            {
-                                case RunningLane.Mid:
-                                    startX = currentMidLanePos.x;
-                                    break;
-                                case RunningLane.Left:
-                                    startX = currentMidLanePos.x + laneChangeDistance;
-                                    break;
-                            }
-                            goalX = startX - laneChangeDistance;
-                            break;
-                        case MoveDirection.West:
-                            switch (lastLane)
-                            {
-                                case RunningLane.Mid:
-                                    startZ = currentMidLanePos.z;
-                                    break;
-                                case RunningLane.Left:
-                                    startZ = currentMidLanePos.z - laneChangeDistance;
-                                    break;
-                            }
-                            goalZ = startZ + laneChangeDistance;
-                            break;
-                        case MoveDirection.East:
-                            switch (lastLane)
-                            {
-                                case RunningLane.Mid:
-                                    startZ = currentMidLanePos.z;
-                                    break;
-                                case RunningLane.Left:
-                                    startZ = currentMidLanePos.z + laneChangeDistance;
-                                    break;
-                            }
-                            goalZ = startZ - laneChangeDistance;
-                            break;
-                    }
+                    case MoveDirection.North:
+                        switch (lastLane)
+                        {
+                            case RunningLane.Mid:
+                                startX = currentMidLanePos.x;
+                                break;
+                            case RunningLane.Left:
+                                startX = currentMidLanePos.x - laneChangeDistance;
+                                break;
+                        }
+                        goalX = startX + laneChangeDistance;
+                        break;
+                    case MoveDirection.South:
+                        switch (lastLane)
+                        {
+                            case RunningLane.Mid:
+                                startX = currentMidLanePos.x;
+                                break;
+                            case RunningLane.Left:
+                                startX = currentMidLanePos.x + laneChangeDistance;
+                                break;
+                        }
+                        goalX = startX - laneChangeDistance;
+                        break;
+                    case MoveDirection.West:
+                        switch (lastLane)
+                        {
+                            case RunningLane.Mid:
+                                startZ = currentMidLanePos.z;
+                                break;
+                            case RunningLane.Left:
+                                startZ = currentMidLanePos.z - laneChangeDistance;
+                                break;
+                        }
+                        goalZ = startZ + laneChangeDistance;
+                        break;
+                    case MoveDirection.East:
+                        switch (lastLane)
+                        {
+                            case RunningLane.Mid:
+                                startZ = currentMidLanePos.z;
+                                break;
+                            case RunningLane.Left:
+                                startZ = currentMidLanePos.z + laneChangeDistance;
+                                break;
+                        }
+                        goalZ = startZ - laneChangeDistance;
+                        break;
                 }
             }
+            
         }
     }
 
@@ -357,6 +354,7 @@ public class PlayerRunner : MonoBehaviour {
         canTurn = false;
 
         Vector3 currentPos = transform.position;
+        Debug.Log("Pre turn pos " + currentPos);
 
         bool turningOntoPiece = false;
         if(isRightTurn && nextRightMidPos != Vector3.zero)
@@ -541,7 +539,7 @@ public class PlayerRunner : MonoBehaviour {
                         distToNextLeftLane = Mathf.Abs(currentPos.z - (nextRightMidPos.z - 2f));
                         distToNextMidLane = Mathf.Abs(currentPos.z - (nextRightMidPos.z));
                         distToNextRightLane = Mathf.Abs(currentPos.z - (nextRightMidPos.z + 2f));
-                        Debug.Log("Left " + distToNextLeftLane + " mid " + distToNextMidLane + " right " + distToNextRightLane);
+                        //Debug.Log("Left " + distToNextLeftLane + " mid " + distToNextMidLane + " right " + distToNextRightLane);
 
                         if (distToNextRightLane <= distToNextMidLane
                             && distToNextRightLane <= distToNextLeftLane)
@@ -589,7 +587,7 @@ public class PlayerRunner : MonoBehaviour {
                     break;
             }
         }
-        Debug.Log("current pos " + currentPos);
+        //Debug.Log("current pos " + currentPos);
         transform.position = currentPos;
 
         nextLeftMidPos = Vector3.zero;
@@ -616,6 +614,8 @@ public class PlayerRunner : MonoBehaviour {
             doLaneChange = false;
             laneChangeTimer = 0f;
             pAniController.StraightRunAnimation();
+            pCombat.pFXController.StopAttackFX();
+            pEventHandler.ChangeLaneEvent(currentLane);
         }
     }
 
@@ -630,24 +630,24 @@ public class PlayerRunner : MonoBehaviour {
     void JumpRunner()
     {
         gameObject.GetComponent<Rigidbody>().AddForce(transform.up * jumpForce, ForceMode.Impulse);
-        if(pCombat.jumpEnemy != null)
-        {
-            pCombat.DoJumpAttack();
-        }
+        
         pAniController.JumpAnimation();
-
+        
         doSliding = false;
+        currentSlideTimer = 0f;
     }
 
     public void DoSlide()
     {
         if (isGrounded)
         {
+            
             SlideRunner();
-            if(pCombat.slideEnemy != null)
-            {
-                pCombat.DoSlideAttack();
-            }
+            
+        }
+        else
+        {
+            SlideRunner();
         }
     }
 
@@ -656,6 +656,10 @@ public class PlayerRunner : MonoBehaviour {
         //Setup an animation to handle this
         doSliding = true;
         pAniController.SlideAnimation();
+        if(isGrounded == false)
+        {
+            gameObject.GetComponent<Rigidbody>().AddForce(-transform.up * slideAirDownForce, ForceMode.Impulse);
+        }
     }
 
     public void DoBumpLeft()

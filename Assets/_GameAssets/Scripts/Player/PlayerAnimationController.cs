@@ -11,6 +11,11 @@ public class PlayerAnimationController : MonoBehaviour {
         playerAnimator.SetBool("DoLeftLaneChange", false);
         playerAnimator.SetBool("DoRightLaneChange", false);
         playerAnimator.SetBool("DoSlide", false);
+        playerAnimator.SetBool("DoRightAttack", false);
+        playerAnimator.SetBool("DoLeftAttack", false);
+        playerAnimator.SetBool("DoJumpAttack", false);
+        playerAnimator.SetBool("DoSlideAttack", false);
+        playerAnimator.SetBool("DoFrontAttack", false);
     }
 
     public void LeftLaneChangeAnimation()
@@ -18,6 +23,11 @@ public class PlayerAnimationController : MonoBehaviour {
         playerAnimator.SetBool("DoJump", false);
         playerAnimator.SetBool("DoRightLaneChange", false);
         playerAnimator.SetBool("DoSlide", false);
+        playerAnimator.SetBool("DoRightAttack", false);
+        playerAnimator.SetBool("DoLeftAttack", false);
+        playerAnimator.SetBool("DoJumpAttack", false);
+        playerAnimator.SetBool("DoSlideAttack", false);
+        playerAnimator.SetBool("DoFrontAttack", false);
 
         playerAnimator.SetBool("DoLeftLaneChange", true);
     }
@@ -28,6 +38,11 @@ public class PlayerAnimationController : MonoBehaviour {
         playerAnimator.SetBool("DoJump", false);
         playerAnimator.SetBool("DoLeftLaneChange", false);
         playerAnimator.SetBool("DoSlide", false);
+        playerAnimator.SetBool("DoRightAttack", false);
+        playerAnimator.SetBool("DoLeftAttack", false);
+        playerAnimator.SetBool("DoJumpAttack", false);
+        playerAnimator.SetBool("DoSlideAttack", false);
+        playerAnimator.SetBool("DoFrontAttack", false);
 
         playerAnimator.SetBool("DoRightLaneChange", true);
     }
@@ -38,6 +53,11 @@ public class PlayerAnimationController : MonoBehaviour {
         playerAnimator.SetBool("DoLeftLaneChange", false);
         playerAnimator.SetBool("DoRightLaneChange", false);
         playerAnimator.SetBool("DoSlide", false);
+        playerAnimator.SetBool("DoRightAttack", false);
+        playerAnimator.SetBool("DoLeftAttack", false);
+        playerAnimator.SetBool("DoJumpAttack", false);
+        playerAnimator.SetBool("DoSlideAttack", false);
+        playerAnimator.SetBool("DoFrontAttack", false);
 
         playerAnimator.SetBool("DoJump", true);
     }
@@ -48,27 +68,83 @@ public class PlayerAnimationController : MonoBehaviour {
         playerAnimator.SetBool("DoJump", false);
         playerAnimator.SetBool("DoLeftLaneChange", false);
         playerAnimator.SetBool("DoRightLaneChange", false);
+        playerAnimator.SetBool("DoRightAttack", false);
+        playerAnimator.SetBool("DoLeftAttack", false);
+        playerAnimator.SetBool("DoJumpAttack", false);
+        playerAnimator.SetBool("DoSlideAttack", false);
+        playerAnimator.SetBool("DoFrontAttack", false);
 
         playerAnimator.SetBool("DoSlide", true);
     }
 
+    public void FrontAttackAnimation()
+    {
+        playerAnimator.SetBool("DoLeftLaneChange", false);
+        playerAnimator.SetBool("DoRightLaneChange", false);
+        playerAnimator.SetBool("DoSlide", false);
+        playerAnimator.SetBool("DoJump", false);
+        playerAnimator.SetBool("DoLeftAttack", false);
+        playerAnimator.SetBool("DoJumpAttack", false);
+        playerAnimator.SetBool("DoSlideAttack", false);
+        playerAnimator.SetBool("DoRightAttack", false);
+
+        playerAnimator.SetBool("DoFrontAttack", true);
+    }
+
     public void RightAttackAnimation()
     {
+        playerAnimator.SetBool("DoLeftLaneChange", false);
+        playerAnimator.SetBool("DoRightLaneChange", false);
+        playerAnimator.SetBool("DoSlide", false);
+        playerAnimator.SetBool("DoJump", false);
+        playerAnimator.SetBool("DoLeftAttack", false);
+        playerAnimator.SetBool("DoJumpAttack", false);
+        playerAnimator.SetBool("DoSlideAttack", false);
+        playerAnimator.SetBool("DoFrontAttack", false);
 
+        playerAnimator.SetBool("DoRightAttack", true);
     }
 
     public void LeftAttackAnimation()
     {
+        playerAnimator.SetBool("DoLeftLaneChange", false);
+        playerAnimator.SetBool("DoRightLaneChange", false);
+        playerAnimator.SetBool("DoSlide", false);
+        playerAnimator.SetBool("DoJump", false);
+        playerAnimator.SetBool("DoRightAttack", false);
+        playerAnimator.SetBool("DoJumpAttack", false);
+        playerAnimator.SetBool("DoSlideAttack", false);
+        playerAnimator.SetBool("DoFrontAttack", false);
+
+        playerAnimator.SetBool("DoLeftAttack", true);
 
     }
 
     public void JumpAttackAnimation()
     {
+        playerAnimator.SetBool("DoJump", false);
+        playerAnimator.SetBool("DoLeftLaneChange", false);
+        playerAnimator.SetBool("DoRightLaneChange", false);
+        playerAnimator.SetBool("DoSlide", false);
+        playerAnimator.SetBool("DoRightAttack", false);
+        playerAnimator.SetBool("DoLeftAttack", false);
+        playerAnimator.SetBool("DoSlideAttack", false);
+        playerAnimator.SetBool("DoFrontAttack", false);
 
+        playerAnimator.SetBool("DoJumpAttack", true);
     }
 
     public void SlideAttackAnimation()
     {
+        playerAnimator.SetBool("DoJump", false);
+        playerAnimator.SetBool("DoLeftLaneChange", false);
+        playerAnimator.SetBool("DoRightLaneChange", false);
+        playerAnimator.SetBool("DoSlide", false);
+        playerAnimator.SetBool("DoRightAttack", false);
+        playerAnimator.SetBool("DoLeftAttack", false);
+        playerAnimator.SetBool("DoJumpAttack", false);
+        playerAnimator.SetBool("DoFrontAttack", false);
 
+        playerAnimator.SetBool("DoSlideAttack", true);
     }
 }

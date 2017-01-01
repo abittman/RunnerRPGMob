@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class RunnerResource
 {
     public ResourceType resourceType;
+    public string resourceName;
     public int resourceVal = 0;
 }
 
@@ -22,13 +23,20 @@ public class ResourcesManager : MonoBehaviour {
 
     public List<RunnerResource> allResources = new List<RunnerResource>();
 
-    public Text coinText;
-    public Text woodText;
-    public Text stoneText;
+    public List<RunnerResource> currentRunResources = new List<RunnerResource>();
+
+    public ResourceResponsiveUI resourceGameUI;
 
 	// Use this for initialization
-	void Start () {
-	
+	void Start ()
+    {
+	    //Copy all resource types to current run resources
+        for(int i = 0; i < allResources.Count; i++)
+        {
+            currentRunResources.Add(allResources[i]);
+            //Problem here - linked values. Need to be copies.
+            currentRunResources[i].resourceVal = 0;
+        }
 	}
 	
 	// Update is called once per frame
@@ -38,16 +46,18 @@ public class ResourcesManager : MonoBehaviour {
 
     public void AddResource(ResourceType typeToAdd, int addAmount)
     {
-        allResources.Find(x => x.resourceType == typeToAdd).resourceVal += addAmount;
+        RunnerResource rr = currentRunResources.Find(x => x.resourceType == typeToAdd);
+        rr.resourceVal += addAmount;
 
-        UpdateUI();
+        //UpdateUI();
+        resourceGameUI.ResourcePickedUp(rr, addAmount);
     }
 
     public void SpendResource(ResourceType typeToAdd, int removeAmount)
     {
         allResources.Find(x => x.resourceType == typeToAdd).resourceVal -= removeAmount;
 
-        UpdateUI();
+        //UpdateUI();
     }
 
     public bool ResourceHasAmount(ResourceType typeToAdd, int checkAmount)
@@ -62,10 +72,25 @@ public class ResourcesManager : MonoBehaviour {
         }
     }
 
-    void UpdateUI()
+    public void SaveHalfTempResources()
     {
-        coinText.text = allResources.Find(x => x.resourceType == ResourceType.Gold).resourceVal.ToString();
-        woodText.text = allResources.Find(x => x.resourceType == ResourceType.Wood).resourceVal.ToString();
-        stoneText.text = allResources.Find(x => x.resourceType == ResourceType.Stone).resourceVal.ToString();
+        for (int i = 0; i < currentRunResources.Count; i++)
+        {
+            RunnerResource addRes = allResources.Find(x => x.resourceType == currentRunResources[i].resourceType);
+            addRes.resourceVal += (currentRunResources[i].resourceVal / 2);
+        }
+
+        currentRunResources.Clear();
+    }
+
+    public void SaveAllTempResources()
+    {
+        for(int i = 0; i< currentRunResources.Count; i++)
+        {
+            RunnerResource addRes = allResources.Find(x => x.resourceType == currentRunResources[i].resourceType);
+            addRes.resourceVal += currentRunResources[i].resourceVal;
+        }
+
+        currentRunResources.Clear();
     }
 }

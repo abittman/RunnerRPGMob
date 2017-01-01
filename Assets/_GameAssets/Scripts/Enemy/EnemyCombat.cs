@@ -1,106 +1,87 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
 public class EnemyCombat : MonoBehaviour {
 
-    public EnemyStatus eStatus;
-    public EnemyMovement thisEnemyMover;
-
-    public PlayerCombat pCombat;
+    public EnemyBehaviour eBehaviour;
 
     public float damageAmount = 5f;
+    public float preAttackDelay = 0.5f;
+    bool inPreAttackDelay = false;
     public float delayBetweenAttacks;
     float nextAttackTimer = 0f;
+    public float attackAnimationTime = 0.25f;
+    bool inAttackAnimation = false;
 
     bool combatStarted = false;
     bool canAttack = false;
 
+    [Space]
     public bool attacksOnSides = true;
     public bool attacksOnSameLane = false;
+    public bool attacksOnMultipleLanes = false;
+    public List<RunningLane> multipleLaneAttackOptions = new List<RunningLane>();
+    [Space]
+    public bool doesRangedAttack = false;
+    public bool doesMeleeAttack = false;
+    [Space]
+    public GameObject projectilePool;
+    public GameObject rangedProjectilePrefab;
 
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
+    public void ResetCombat()
+    {
+        combatStarted = false;
+        canAttack = false;
+        nextAttackTimer = 0f;
+    }
+
 	// Update is called once per frame
 	void Update ()
     {
 	    if(combatStarted)
         {
-            CheckPlayerProximity();
-
             nextAttackTimer += Time.deltaTime;
-            if(nextAttackTimer >= delayBetweenAttacks)
+
+            if (inPreAttackDelay == false)
             {
-                EnemyAttacks();
-                nextAttackTimer = 0f;
+                //Pre attack delay
+                if (nextAttackTimer >= delayBetweenAttacks - preAttackDelay)
+                {
+                    //Pre attack animation
+                    eBehaviour.eAnimatorController.DoAttackPrepAnimation();
+                    inPreAttackDelay = true;
+                }
+            }
+
+            if (inPreAttackDelay)
+            {
+                if (doesMeleeAttack)
+                {
+                    //CheckPlayerProximity();
+                    if (nextAttackTimer >= delayBetweenAttacks)
+                    {
+                        EnemyAttacks_Melee();
+                    }
+                }
+                else if (doesRangedAttack)
+                {
+                    if (nextAttackTimer >= delayBetweenAttacks)
+                    {
+                        EnemyAttacks_Ranged();
+                    }
+                }
+            }
+
+            if(inAttackAnimation)
+            {
+                if(nextAttackTimer >= delayBetweenAttacks + attackAnimationTime)
+                {
+                    nextAttackTimer = 0f;
+                    inAttackAnimation = false;
+                }
             }
         }
 	}
-
-    void CheckPlayerProximity()
-    {
-        if (attacksOnSides)
-        {
-            switch (thisEnemyMover.thisEnemyRunningLane)
-            {
-                case RunningLane.Left:
-                    if (pCombat.pRunner.currentLane == RunningLane.Mid)
-                    {
-                        EnemyInCombat();
-                        pCombat.leftEnemy = this;
-                    }
-                    else
-                    {
-                        EnemyOutOfCombat();
-                    }
-                    break;
-                case RunningLane.Mid:
-                    if (pCombat.pRunner.currentLane == RunningLane.Left)
-                    {
-                        EnemyInCombat();
-                        pCombat.rightEnemy = this;
-                    }
-                    else if (pCombat.pRunner.currentLane == RunningLane.Right)
-                    {
-                        EnemyInCombat();
-                        pCombat.leftEnemy = this;
-                    }
-                    else
-                    {
-                        EnemyOutOfCombat();
-                    }
-                    break;
-                case RunningLane.Right:
-                    if (pCombat.pRunner.currentLane == RunningLane.Mid)
-                    {
-                        EnemyInCombat();
-                        pCombat.rightEnemy = this;
-                    }
-                    else
-                    {
-                        EnemyOutOfCombat();
-                    }
-                    break;
-            }
-        }
-        else if(attacksOnSameLane)
-        {
-            if(thisEnemyMover.thisEnemyRunningLane == pCombat.pRunner.currentLane)
-            {
-                EnemyInCombat();
-                if(thisEnemyMover.isFlying)
-                {
-                    pCombat.jumpEnemy = this;
-                }
-                else
-                {
-                    pCombat.slideEnemy = this;
-                }
-            }
-        }
-    }
 
     public void PrepareEnemyCombat()
     {
@@ -116,33 +97,75 @@ public class EnemyCombat : MonoBehaviour {
     {
         canAttack = false;
 
-        if(pCombat.leftEnemy == this)
-        {
-            pCombat.leftEnemy = null;
-        }
-        else if(pCombat.rightEnemy == this)
-        {
-            pCombat.rightEnemy = null;
-        }
-        else if(pCombat.jumpEnemy == this)
-        {
-            pCombat.jumpEnemy = null;
-        }
-        else if(pCombat.slideEnemy == this)
-        {
-            pCombat.slideEnemy = null;
-        }
+        eBehaviour.pCombat.ClearEnemy(eBehaviour);
     }
 
-    void EnemyAttacks()
+    void EnemyAttacks_Melee()
     {
-        if (canAttack)
+        bool attackSuccess = false;
+        bool rightAttack = false;
+        bool leftAttack = false;
+        //Check player location
+        switch(eBehaviour.eMover.thisEnemyRunningLane)
         {
-            pCombat.pStatus.DamageHealth(damageAmount);
+            case RunningLane.Left:
+                //Player cannot be left
+
+                //Player may be right
+                if(eBehaviour.pRunner.currentLane == RunningLane.Mid)
+                {
+                    attackSuccess = true;
+                    rightAttack = true;
+                }
+                break;
+            case RunningLane.Mid:
+                //Player may be left
+                if (eBehaviour.pRunner.currentLane == RunningLane.Left)
+                {
+                    attackSuccess = true;
+                    leftAttack = true;
+                }
+
+                //Player may be right
+                if (eBehaviour.pRunner.currentLane == RunningLane.Right)
+                {
+                    attackSuccess = true;
+                    rightAttack = true;
+                }
+                break;
+            case RunningLane.Right:
+                //Player may be left
+                if (eBehaviour.pRunner.currentLane == RunningLane.Mid)
+                {
+                    attackSuccess = true;
+                    leftAttack = true;
+                }
+
+                //Player cannot be right
+                break;
         }
-        else
+
+        //Do animation
+        eBehaviour.eAnimatorController.DoAttackAnimation();
+
+        //Do damage if applicable
+        if (attackSuccess)
         {
-            //miss
+            eBehaviour.pCombat.pStatus.DamageHealth(damageAmount);
         }
+
+        inAttackAnimation = true;
+        inPreAttackDelay = false;
+    }
+
+    void EnemyAttacks_Ranged()
+    {
+        GameObject g = Instantiate(rangedProjectilePrefab, projectilePool.transform) as GameObject;
+        g.transform.position = transform.position;
+        g.transform.eulerAngles = rangedProjectilePrefab.transform.eulerAngles + transform.eulerAngles;
+        g.GetComponent<ProjectileMovement>().pStatus = eBehaviour.pCombat.pStatus;
+
+        inAttackAnimation = true;
+        inPreAttackDelay = false;
     }
 }
