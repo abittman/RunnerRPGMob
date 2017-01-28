@@ -56,7 +56,7 @@ public class BuildingsManager : MonoBehaviour {
 
         for (int i = 0; i < townBuildingRef.requiredBuildingResources.Count; i++)
         {
-            if (resourcesMan.ResourceHasAmount(townBuildingRef.requiredBuildingResources[i].resourceType, townBuildingRef.requiredBuildingResources[i].resourceVal))
+            if (resourcesMan.ResourceHasAmount(townBuildingRef.requiredBuildingResources[i].resourceType, townBuildingRef.requiredBuildingResources[i].resourceVal, true))
             {
                 canBuild = true;
             }

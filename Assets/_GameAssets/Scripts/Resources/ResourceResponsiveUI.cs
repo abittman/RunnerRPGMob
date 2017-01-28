@@ -52,7 +52,7 @@ public class ResourceResponsiveUI : MonoBehaviour {
         }
 	}
 
-    public void ResourcePickedUp(RunnerResource resource, int addAmount)
+    public void ResourcePickedUp(RunnerResource resource)
     {
         for(int i = 0; i < allResourceTexts.Count; i++)
         {
@@ -61,7 +61,7 @@ public class ResourceResponsiveUI : MonoBehaviour {
             {
                 allResourceTexts[i].associatedResource = resource;
                 allResourceTexts[i].resourceNameText.text = resource.resourceName;
-                allResourceTexts[i].resourceValText.text = addAmount.ToString();
+                allResourceTexts[i].resourceValText.text = resource.resourceVal.ToString();
 
                 allResourceTexts[i].displayTimer = timeToDisplayUI;
 

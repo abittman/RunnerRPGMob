@@ -9,19 +9,13 @@ public class WorldObstacles : MonoBehaviour {
 
     public float obstacleHitDamage = 25f;
 
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
-
-    void OnCollisionEnter(Collision cols)
+	void SetupObstacle()
     {
-        if(cols.collider.gameObject.layer == LayerMask.NameToLayer("PlayerLayer"))
+    }
+
+    void OnTriggerEnter(Collider cold)
+    {
+        if(cold.gameObject.layer == LayerMask.NameToLayer("PlayerLayer"))
         {
             pStatus.DamageHealth(obstacleHitDamage);
 

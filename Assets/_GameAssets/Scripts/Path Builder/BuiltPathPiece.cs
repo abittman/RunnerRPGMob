@@ -5,37 +5,40 @@ public class BuiltPathPiece : MonoBehaviour {
 
     public InteractionTrigger killTriggerArea;
 
-    public TurnTriggerArea connectedTriggerArea;
+    //public TurnTriggerArea connectedTurnTriggerArea;
 
     public PathPiece connectedPathPiece;
 
-
+    [Header("Path Building Variables")]
     [Tooltip("Must include turn area also")]
     public Vector3 objectScale = new Vector3(8f, 0f, 80f);
 
     //Showonly
     public MoveDirection intendedMoveDirection;
 
+    public List<PathTurnConditions> exitLocations = new List<PathTurnConditions>();
+
     [Header("Linked elements")]
     //public EnemyMovement linkedEnemy;
     public List<EnemyBehaviour> linkedEnemies = new List<EnemyBehaviour>();
-    public List<ItemPickup> itemPickups = new List<ItemPickup>();
+    public List<ResourceNode> resourceNodes = new List<ResourceNode>();
+
+    public bool isActive = false;
+
+    public void ActivateFromPool()
+    {
+        gameObject.SetActive(true);
+        isActive = true;
+    }
 
     public void ActivateFromPool(Vector3 spawnLocation, Vector3 rotationEuler)
     {
         transform.eulerAngles = rotationEuler;
         transform.position = spawnLocation;
         gameObject.SetActive(true);
-
-        for(int i = 0; i < itemPickups.Count; i++)
-        {
-            itemPickups[i].ActivatePickup();
-        }
-
-        for(int i = 0; i < linkedEnemies.Count; i++)
-        {
-            linkedEnemies[i].EnemySpawned(this);
-        }
+        isActive = true;
+        //Node activation
+        
     }
 
     public void PlayerOnThisPiece()
@@ -46,16 +49,38 @@ public class BuiltPathPiece : MonoBehaviour {
         }
     }
 
-    public void DeactivateToPool()
+    public void DeactivateToPool(bool deactivateConnections)
     {
+        if (deactivateConnections)
+        {
+            for (int i = 0; i < exitLocations.Count; i++)
+            {
+                if (exitLocations[i].nextLeftPathPiece != null)
+                {
+                    exitLocations[i].nextLeftPathPiece.DeactivateToPool(false);
+                    exitLocations[i].nextLeftPathPiece = null;
+                }
+                if (exitLocations[i].nextRightPathPiece != null)
+                {
+                    exitLocations[i].nextRightPathPiece.DeactivateToPool(false);
+                    exitLocations[i].nextRightPathPiece = null;
+                }
+            }
+        }
+
         if (connectedPathPiece.isTownPiece == false)
         {
             gameObject.SetActive(false);
-            connectedTriggerArea.proceduralConnectedPieces.Clear();
+            for (int i = 0; i < exitLocations.Count; i++)
+            {
+                exitLocations[i].connectedTurnTriggerArea.proceduralConnectedPieces.Clear();
+            }
         }
         else
         {
             Debug.Log("Cannot deactivate town piece by itself");
         }
+
+        isActive = false;
     }
 }

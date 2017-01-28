@@ -19,9 +19,9 @@ public class RunnerGate : MonoBehaviour {
 
     void OnTriggerEnter(Collider col)
     {
-        if(col.gameObject.tag == "Player")
+        if(col.gameObject.layer == LayerMask.NameToLayer("PlayerLayer"))
         {
-            if (GameObject.Find("ResourcesManager").GetComponent<ResourcesManager>().ResourceHasAmount(requiredResource.resourceType, requiredResource.resourceVal))
+            if (GameObject.Find("ResourcesManager").GetComponent<ResourcesManager>().ResourceHasAmount(requiredResource.resourceType, requiredResource.resourceVal, true))
             {
                 foreach(GameObject g in collisionObjects)
                 {

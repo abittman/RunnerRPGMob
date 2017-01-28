@@ -4,24 +4,23 @@ using System.Collections;
 public class PathTriggerArea : MonoBehaviour {
 
     public BuiltPathPiece parentPathPiece;
-    public PathBuilder pathBuilder;
+    //public PathBuilder pathBuilder;
+    public PathBuilderv2 pathBuilder;
     public MoveDirection thisMoveDirection;
 
 	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
+	void Start ()
+    {
+        //[TODO] no find
+        pathBuilder = GameObject.Find("WorldBuilder").GetComponent<PathBuilderv2>();
 	}
 
     void OnTriggerEnter(Collider col)
     {
         if(col.gameObject.tag == "Player")
         {
-            pathBuilder.CreateNextPath(parentPathPiece);
+            pathBuilder.PlayerEntersNewPiece(parentPathPiece);
+            //[TODO] replace with new system
         }
     }
 }

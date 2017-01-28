@@ -75,10 +75,7 @@ public class PathPiece : MonoBehaviour {
             }
         }
 
-        for(int i = 0; i<allItems.Count; i++)
-        {
-            allItems[i].ActivatePickup();
-        }
+        //Activate nodes?
     }
 
 }
