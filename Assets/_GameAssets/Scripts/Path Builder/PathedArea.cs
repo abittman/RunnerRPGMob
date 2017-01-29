@@ -26,4 +26,17 @@ public class PathedArea
 
     [Header("Connection pieces")]
     public List<PathConnectionPiece> connectionPieces = new List<PathConnectionPiece>();
+
+    [Header("Fixed Area Only - Entrances")]
+    public List<FixedAreaEntrances> entrances = new List<FixedAreaEntrances>();
+
+    public PathConnectionPiece GetConnectionPieceOfBPP(BuiltPathPiece bppRef)
+    {
+        return connectionPieces.Find(x => x.thisConnectionPiece == bppRef);
+    }
+
+    public FixedAreaEntrances GetFixedAreaEntranceForAreaType(AreaTypes aType)
+    {
+        return entrances.Find(x => x.areaFrom == aType);
+    }
 }

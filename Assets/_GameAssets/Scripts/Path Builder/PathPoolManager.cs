@@ -15,6 +15,11 @@ public class PathPoolManager : MonoBehaviour {
 
     void Start()
     {
+        for(int i = 0; i < allPathedAreas.Count; i++)
+        {
+            allPathedAreas[i].SetupPoolGroup();
+        }
+
         DeactivateAllPoolPieces();
         SetStartingArea(AreaTypes.Town);
     }
@@ -28,9 +33,8 @@ public class PathPoolManager : MonoBehaviour {
             {
                 for (int j = 0; j < allPathedAreas[i].thisPathedArea.thisAreaProceduralPieces.Count; j++)
                 {
-                    allPathedAreas[i].thisPathedArea.thisAreaProceduralPieces[j].DeactivateToPool(true);
+                    allPathedAreas[i].thisPathedArea.thisAreaProceduralPieces[j].DeactivateToPool();
                 }
-                allPathedAreas[i].activeGroupPieces.Clear();
             }
             else if(allPathedAreas[i].thisPathedArea.thisAreaFormat == AreaFormat.Fixed)
             {
@@ -76,9 +80,9 @@ public class PathPoolManager : MonoBehaviour {
         {
             if (allPathedAreas[i].thisPathedArea.thisAreaFormat == AreaFormat.Procedural)
             {
-                for (int j = 0; j < allPathedAreas[i].activeGroupPieces.Count; j++)
+                for (int j = 0; j < allPathedAreas[i].allPoolPieces.Count; j++)
                 {
-                    if (allPathedAreas[i].activeGroupPieces[j] == bppRef)
+                    if (allPathedAreas[i].allPoolPieces[j] == bppRef)
                     {
                         return allPathedAreas[i].thisPathedArea;
                     }
@@ -105,9 +109,6 @@ public class PathPoolManager : MonoBehaviour {
         //Get a random available piece from that group
         BuiltPathPiece availablePiece = GetProceduralBPPForGroup(ppGroup);
 
-        //Add to active pool
-        ppGroup.activeGroupPieces.Add(availablePiece);
-
         //Return the piece
         return availablePiece;
     }
@@ -120,27 +121,43 @@ public class PathPoolManager : MonoBehaviour {
         //Get a random available piece from that group
         BuiltPathPiece availablePiece = GetProceduralBPPForGroup(ppGroup);
 
-        //Add to active pool
-        ppGroup.activeGroupPieces.Add(availablePiece);
-
         //Return the piece
         return availablePiece;
     }
 
+    //Alternate version required for connection pieces also?
     public BuiltPathPiece GetProceduralBPPForGroup(PathPoolGroup pathPoolGroup)
     {
-        //[TODO] Better way of doing this? - counts are not that great...
-        if (pathPoolGroup.activeGroupPieces.Count < pathPoolGroup.thisPathedArea.thisAreaProceduralPieces.Count)
+        List<BuiltPathPiece> allActivePieces = pathPoolGroup.GetOnlyInactivePoolPieces();
+
+        if (allActivePieces.Count > 0)
         {
             //This loop sucks [TODO] make better
             bool loopForever = true;
             do
             {
-                int rand = Random.Range(0, pathPoolGroup.thisPathedArea.thisAreaProceduralPieces.Count);
+                bool pieceFailed = false;
+                int rand = Random.Range(0, allActivePieces.Count);
 
-                if (pathPoolGroup.thisPathedArea.thisAreaProceduralPieces[rand].isActive == false)
+                for(int i = 0; i < pathPoolGroup.thisPathedArea.connectionPieces.Count; i++)
                 {
-                    return pathPoolGroup.thisPathedArea.thisAreaProceduralPieces[rand];
+                    if(pathPoolGroup.thisPathedArea.connectionPieces[i].thisConnectionPiece == allActivePieces[rand])
+                    {
+                        if(pathPoolGroup.thisPathedArea.connectionPieces[i].minPosToOffer <= pathBuilder.currentPathProgress)
+                        {
+                            return allActivePieces[rand];
+                        }
+                        else
+                        {
+                            pieceFailed = true;
+                        }
+                    }
+                }
+
+                if (allActivePieces[rand].isActive == false
+                    && pieceFailed == false)
+                {
+                    return allActivePieces[rand];
                 }
             } while (loopForever);
 
@@ -165,18 +182,98 @@ public class PathPoolManager : MonoBehaviour {
         {
             thisGroup.pathFirstRightPiece = bppRef;
         }
-
-        //[TODO] proper piece activation call
+        
         bppRef.ActivateFromPool();
     }
 
     public void ActivatePathPiece_InCurrentArea(BuiltPathPiece bppRef)
     {
-        //[TODO] proper piece activation call
         bppRef.ActivateFromPool();
     }
 
     #region Deactivation
     //[TODO] deactivate from pool for recycling
+
+    public void DeactivatePieces(BuiltPathPiece lastPiece, BuiltPathPiece currentPiece)
+    {
+        Debug.Log("Deactivate pieces");
+        //Deactivate last piece on delay
+        PathedArea lastPA = GetAreaForBuiltPathPiece(lastPiece);
+        StartCoroutine(DeactivatePieceOnDelay(lastPiece, lastPA));
+
+        //Deactivate alternate piece on delay
+        //Deactivate non alternate exits, and children, instantly
+        for (int i = 0; i < lastPiece.exitLocations.Count; i++)
+        {
+            //If player did not turn left here, disable it
+            if(lastPiece.exitLocations[i].nextLeftPathPiece != currentPiece)
+            {
+                PathedArea altPA = GetAreaForBuiltPathPiece(lastPiece.exitLocations[i].nextLeftPathPiece);
+
+                if (altPA.thisAreaFormat == AreaFormat.Procedural)
+                {
+                    lastPiece.exitLocations[i].nextLeftPathPiece.DeactivateToPool();
+                    for (int j = 0; j < lastPiece.exitLocations[i].nextLeftPathPiece.exitLocations.Count; j++)
+                    {
+                        lastPiece.exitLocations[i].nextLeftPathPiece.exitLocations[j].nextLeftPathPiece.DeactivateToPool();
+
+                        lastPiece.exitLocations[i].nextLeftPathPiece.exitLocations[j].nextRightPathPiece.DeactivateToPool();
+                    }
+                }
+                else
+                {
+                    altPA.fixedAreaObject.SetActive(false);
+                }
+            }
+            //If player did not turn right here, disable it
+            if (lastPiece.exitLocations[i].nextRightPathPiece != currentPiece)
+            {
+                PathedArea altPA = GetAreaForBuiltPathPiece(lastPiece.exitLocations[i].nextRightPathPiece);
+
+                if (altPA.thisAreaFormat == AreaFormat.Procedural)
+                {
+                    lastPiece.exitLocations[i].nextRightPathPiece.DeactivateToPool();
+                    for (int j = 0; j < lastPiece.exitLocations[i].nextRightPathPiece.exitLocations.Count; j++)
+                    {
+                        lastPiece.exitLocations[i].nextRightPathPiece.exitLocations[j].nextLeftPathPiece.DeactivateToPool();
+
+                        lastPiece.exitLocations[i].nextRightPathPiece.exitLocations[j].nextRightPathPiece.DeactivateToPool();
+                    }
+                }
+                else
+                {
+                    altPA.fixedAreaObject.SetActive(false);
+                }
+            }
+        }
+    }
+
+    IEnumerator DeactivatePieceOnDelay(BuiltPathPiece deactivateBPP, PathedArea pArea)
+    {
+        yield return new WaitForSeconds(0.5f);
+
+        if (pArea.thisAreaFormat == AreaFormat.Procedural)
+        {
+            deactivateBPP.DeactivateToPool();
+        }
+        else
+        {
+            //Deactivate fixed area
+            pArea.fixedAreaObject.SetActive(false);
+            
+            //Also deactivate any connected areas
+            for(int i = 0; i < pArea.connectionPieces.Count; i++)
+            {
+                PathPoolGroup ppGroup = allPathedAreas.Find(x => x.thisPathedArea.thisAreaType == pArea.connectionPieces[i].areaTo);
+
+                if(ppGroup != null
+                    && ppGroup != currentPathPoolGroup)
+                {
+                    ppGroup.pathFirstLeftPiece.DeactivateToPool();
+                    ppGroup.pathFirstRightPiece.DeactivateToPool();
+                }
+            }
+        }
+    }
     #endregion
 }

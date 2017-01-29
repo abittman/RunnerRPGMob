@@ -13,7 +13,7 @@ public class PathBuilderv2 : MonoBehaviour {
     public MoveDirection startingMoveDirection;
     MoveDirection currentMoveDirection;
 
-    int currentPathProgress = 0;
+    public int currentPathProgress = 0;
 
     //Used for positioning the next piece
     Vector3 northAdd;
@@ -27,6 +27,15 @@ public class PathBuilderv2 : MonoBehaviour {
         //Area check
         //PathedArea pa = ppMan.GetAreaForBuiltPathPiece(newPieceRef);
         bool enteredNewArea = false;
+
+        //[TODO] temporary? Will town pieces be BPP?
+        if(currentBPP != null)
+            ppMan.DeactivatePieces(currentBPP, newPieceRef);
+
+        //Current piece is new piece
+        currentBPP = newPieceRef;
+
+        currentPathProgress++;
 
         //If the player has travelled to a new area
         for (int i = 0; i < currentPathArea.connectionPieces.Count; i++)
@@ -117,6 +126,21 @@ public class PathBuilderv2 : MonoBehaviour {
                 leftPiece.transform.eulerAngles = GetEulerAnglesForMoveDirection(leftPiece.intendedMoveDirection);
 
                 extensionBPP.exitLocations[0].nextLeftPathPiece = leftPiece;
+                switch (leftPiece.intendedMoveDirection)
+                {
+                    case MoveDirection.North:
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.northPiece = leftPiece.connectedPathPiece;
+                        break;
+                    case MoveDirection.East:
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.eastPiece = leftPiece.connectedPathPiece;
+                        break;
+                    case MoveDirection.South:
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.southPiece = leftPiece.connectedPathPiece;
+                        break;
+                    case MoveDirection.West:
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.westPiece = leftPiece.connectedPathPiece;
+                        break;
+                }
 
                 //Activate piece
                 ppMan.ActivatePathPiece_InConnectedArea(connectedPathArea, leftPiece, true, false);
@@ -134,28 +158,148 @@ public class PathBuilderv2 : MonoBehaviour {
                 rightPiece.transform.eulerAngles = GetEulerAnglesForMoveDirection(rightPiece.intendedMoveDirection);
 
                 extensionBPP.exitLocations[0].nextRightPathPiece = rightPiece;
-
+                switch (rightPiece.intendedMoveDirection)
+                {
+                    case MoveDirection.North:
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.northPiece = rightPiece.connectedPathPiece;
+                        break;
+                    case MoveDirection.East:
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.eastPiece = rightPiece.connectedPathPiece;
+                        break;
+                    case MoveDirection.South:
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.southPiece = rightPiece.connectedPathPiece;
+                        break;
+                    case MoveDirection.West:
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.westPiece = rightPiece.connectedPathPiece;
+                        break;
+                }
                 //Activate piece
                 ppMan.ActivatePathPiece_InConnectedArea(connectedPathArea, rightPiece, false, true);
             }
         }
     }
-
-    //Procedural version of the above
-    void BuildConnectionsToProceduralArea()
-    {
-        //Move fixed areas accordingly
-
-        //OR spawn extensions of next procedural area
-    }
-
+    
     public void ContinueProceduralArea()
     {
         Debug.Log("Spawn procedural pieces");
-        //Confirm whether the player turned left or right
-        //For each of the current piece's exit locations
 
-        //If left, then it becomes the current piece and the right (and it's connections) are disabled)
+        //For each of the current piece's exit locations
+        for(int i = 0; i < currentBPP.exitLocations.Count; i++)
+        {
+            //Check if it's a connection
+            PathConnectionPiece pcpLeft = currentPathArea.GetConnectionPieceOfBPP(currentBPP.exitLocations[i].nextLeftPathPiece);
+            //If it's null, there was nothing to return
+            //If not, then it is a connection piece, and extensions should be spawned for it
+            if (pcpLeft != null)
+            {
+                BuildConnectionsToConnectedArea(pcpLeft);
+            }
+            //Else, spawn extensions normally
+            else
+            {
+                BuildExtensionsForBPP(currentBPP.exitLocations[i].nextLeftPathPiece);
+            }
+
+            //Check if it's a connection
+            PathConnectionPiece pcpRight = currentPathArea.GetConnectionPieceOfBPP(currentBPP.exitLocations[i].nextRightPathPiece);
+            //If it's null, there was nothing to return
+            //If not, then it is a connection piece, and extensions should be spawned for it
+            if (pcpRight != null)
+            {
+                BuildConnectionsToConnectedArea(pcpRight);
+            }
+            //Else, spawn extensions normally
+            else
+            {
+                BuildExtensionsForBPP(currentBPP.exitLocations[i].nextRightPathPiece);
+            }
+        }
+    }
+
+    //[TODO] Extension code could probably / definitely be cleaned up (duplicates)
+    //Procedural version of the above
+    void BuildConnectionsToConnectedArea(PathConnectionPiece connectionPiece)
+    {
+        PathedArea connectedPathArea = ppMan.GetAreaOfType(connectionPiece.areaTo);
+
+        //Move fixed areas accordingly
+        if (connectedPathArea.thisAreaFormat == AreaFormat.Fixed)
+        {
+            //[TODO] properly reposition
+            PositionFixedArea(connectionPiece.thisConnectionPiece, connectedPathArea);
+        }
+        //OR spawn extensions of next procedural area
+        else
+        {
+            //Get Exit Location ref
+            BuiltPathPiece extensionBPP = connectionPiece.thisConnectionPiece;
+            //Get position for pieces to be placed
+            Vector3 exitPosition = extensionBPP.exitLocations[0].pathTurnLocation.position;
+
+            if (extensionBPP.exitLocations[0].canDoLeft)
+            {
+                //Spawn a left piece for this pathed area
+                BuiltPathPiece leftPiece = ppMan.GetValidBPPForAreaType(connectionPiece.areaTo);
+
+                //Position and rotate accordingly
+                leftPiece.intendedMoveDirection = GetLeftMoveDirection(connectionPiece.connectionPieceDirection);
+                leftPiece.transform.position = GetNextPlacementPosition(leftPiece.intendedMoveDirection,
+                                                                        exitPosition,
+                                                                        leftPiece);
+                leftPiece.transform.eulerAngles = GetEulerAnglesForMoveDirection(leftPiece.intendedMoveDirection);
+
+                extensionBPP.exitLocations[0].nextLeftPathPiece = leftPiece;
+                switch (leftPiece.intendedMoveDirection)
+                {
+                    case MoveDirection.North:
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.northPiece = leftPiece.connectedPathPiece;
+                        break;
+                    case MoveDirection.East:
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.eastPiece = leftPiece.connectedPathPiece;
+                        break;
+                    case MoveDirection.South:
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.southPiece = leftPiece.connectedPathPiece;
+                        break;
+                    case MoveDirection.West:
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.westPiece = leftPiece.connectedPathPiece;
+                        break;
+                }
+
+                //Activate piece
+                ppMan.ActivatePathPiece_InConnectedArea(connectedPathArea, leftPiece, true, false);
+            }
+            if (extensionBPP.exitLocations[0].canDoRight)
+            {
+                //Spawn a right piece for this pathed area
+                BuiltPathPiece rightPiece = ppMan.GetValidBPPForAreaType(connectionPiece.areaTo);
+
+                //Position and rotate accordingly
+                rightPiece.intendedMoveDirection = GetRightMoveDirection(connectionPiece.connectionPieceDirection);
+                rightPiece.transform.position = GetNextPlacementPosition(rightPiece.intendedMoveDirection,
+                                                                        exitPosition,
+                                                                        rightPiece);
+                rightPiece.transform.eulerAngles = GetEulerAnglesForMoveDirection(rightPiece.intendedMoveDirection);
+
+                extensionBPP.exitLocations[0].nextRightPathPiece = rightPiece;
+                switch (rightPiece.intendedMoveDirection)
+                {
+                    case MoveDirection.North:
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.northPiece = rightPiece.connectedPathPiece;
+                        break;
+                    case MoveDirection.East:
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.eastPiece = rightPiece.connectedPathPiece;
+                        break;
+                    case MoveDirection.South:
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.southPiece = rightPiece.connectedPathPiece;
+                        break;
+                    case MoveDirection.West:
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.westPiece = rightPiece.connectedPathPiece;
+                        break;
+                }
+                //Activate piece
+                ppMan.ActivatePathPiece_InConnectedArea(connectedPathArea, rightPiece, false, true);
+            }
+        }
     }
 
     public void BuildExtensionsForBPP(BuiltPathPiece bpp)
@@ -177,7 +321,21 @@ public class PathBuilderv2 : MonoBehaviour {
                 leftPiece.transform.eulerAngles = GetEulerAnglesForMoveDirection(leftPiece.intendedMoveDirection);
 
                 bpp.exitLocations[i].nextLeftPathPiece = leftPiece;
-
+                switch (leftPiece.intendedMoveDirection)
+                {
+                    case MoveDirection.North:
+                        bpp.exitLocations[i].connectedTurnTriggerArea.northPiece = leftPiece.connectedPathPiece;
+                        break;
+                    case MoveDirection.East:
+                        bpp.exitLocations[i].connectedTurnTriggerArea.eastPiece = leftPiece.connectedPathPiece;
+                        break;
+                    case MoveDirection.South:
+                        bpp.exitLocations[i].connectedTurnTriggerArea.southPiece = leftPiece.connectedPathPiece;
+                        break;
+                    case MoveDirection.West:
+                        bpp.exitLocations[i].connectedTurnTriggerArea.westPiece = leftPiece.connectedPathPiece;
+                        break;
+                }
                 //Activate piece
                 //[TODO] next version 
                 ppMan.ActivatePathPiece_InCurrentArea(leftPiece);
@@ -197,12 +355,83 @@ public class PathBuilderv2 : MonoBehaviour {
                 rightPiece.transform.eulerAngles = GetEulerAnglesForMoveDirection(rightPiece.intendedMoveDirection);
 
                 bpp.exitLocations[i].nextRightPathPiece = rightPiece;
-
+                switch (rightPiece.intendedMoveDirection)
+                {
+                    case MoveDirection.North:
+                        bpp.exitLocations[i].connectedTurnTriggerArea.northPiece = rightPiece.connectedPathPiece;
+                        break;
+                    case MoveDirection.East:
+                        bpp.exitLocations[i].connectedTurnTriggerArea.eastPiece = rightPiece.connectedPathPiece;
+                        break;
+                    case MoveDirection.South:
+                        bpp.exitLocations[i].connectedTurnTriggerArea.southPiece = rightPiece.connectedPathPiece;
+                        break;
+                    case MoveDirection.West:
+                        bpp.exitLocations[i].connectedTurnTriggerArea.westPiece = rightPiece.connectedPathPiece;
+                        break;
+                }
                 //Activate piece
                 //[TODO] next version 
                 ppMan.ActivatePathPiece_InCurrentArea(rightPiece);
             }
         }
+    }
+
+    void PositionFixedArea(BuiltPathPiece exitPiece, PathedArea fixedArea)
+    {
+        //Get entrance area to align
+        FixedAreaEntrances entranceArea = fixedArea.GetFixedAreaEntranceForAreaType(currentPathArea.thisAreaType);
+
+        //Get original settings of entrancePiece to fixedArea
+        Vector3 pieceOffset = entranceArea.connectedEntrancePathPiece.transform.position - fixedArea.fixedAreaObject.transform.position;
+
+        //"Place" entrance piece going left
+        //entranceArea.connectedEntrancePathPiece.intendedMoveDirection = GetLeftMoveDirection(exitPiece.intendedMoveDirection);
+        //Piece should go straight ahead
+        entranceArea.connectedEntrancePathPiece.intendedMoveDirection = exitPiece.intendedMoveDirection;
+
+        Vector3 exitPosition = GetNextPlacementPosition(entranceArea.connectedEntrancePathPiece.intendedMoveDirection,
+                                                                exitPiece.exitLocations[0].pathTurnLocation.position,
+                                                                entranceArea.connectedEntrancePathPiece);
+
+        //Get rotation where "intended direction" compares to "entrance direction"
+        int directionDiff = (int)entranceArea.connectedEntrancePathPiece.intendedMoveDirection
+                                - (int)entranceArea.entranceDirection;
+        
+        Vector3 fixedEul = Vector3.zero;
+        switch (directionDiff)
+        {
+            case 3:
+            case -1:
+                fixedEul.y = 270f;
+                break;
+            case 2:
+            case -2:
+                fixedEul.y = 180f;
+                break;
+            case 1:
+            case -3:
+                fixedEul.y = 90f;
+                break;
+            //exit and move are same
+            case 0:
+                fixedEul.y = 0f;
+                break;
+        }
+
+        //MoveDirection newFixedAreaDirection = (MoveDirection)directionDiff;
+
+        Debug.Log(exitPiece.intendedMoveDirection + " " + entranceArea.connectedEntrancePathPiece.intendedMoveDirection + " " + entranceArea.entranceDirection + " " + directionDiff);
+
+        //Adjust town based on entrance
+        
+        fixedArea.fixedAreaObject.transform.eulerAngles = fixedEul;
+
+        //entranceArea.connectedEntrancePathPiece.transform.position = exitPosition;
+        Debug.Log(exitPosition + " " + pieceOffset);
+        fixedArea.fixedAreaObject.transform.position = exitPosition + pieceOffset;
+
+        fixedArea.fixedAreaObject.SetActive(true);
     }
 
     #region positional functions

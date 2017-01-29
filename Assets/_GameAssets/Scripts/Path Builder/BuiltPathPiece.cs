@@ -49,25 +49,8 @@ public class BuiltPathPiece : MonoBehaviour {
         }
     }
 
-    public void DeactivateToPool(bool deactivateConnections)
+    public void DeactivateToPool()
     {
-        if (deactivateConnections)
-        {
-            for (int i = 0; i < exitLocations.Count; i++)
-            {
-                if (exitLocations[i].nextLeftPathPiece != null)
-                {
-                    exitLocations[i].nextLeftPathPiece.DeactivateToPool(false);
-                    exitLocations[i].nextLeftPathPiece = null;
-                }
-                if (exitLocations[i].nextRightPathPiece != null)
-                {
-                    exitLocations[i].nextRightPathPiece.DeactivateToPool(false);
-                    exitLocations[i].nextRightPathPiece = null;
-                }
-            }
-        }
-
         if (connectedPathPiece.isTownPiece == false)
         {
             gameObject.SetActive(false);
