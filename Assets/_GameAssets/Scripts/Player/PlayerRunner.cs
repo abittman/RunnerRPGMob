@@ -22,6 +22,7 @@ public class PlayerRunner : MonoBehaviour {
 
     [Header("References")]
     public PlayerEventHandler pEventHandler;
+    public MainGameplayCamera gameCamera;
 
     [Space]
     public PlayerCombat pCombat;
@@ -70,12 +71,20 @@ public class PlayerRunner : MonoBehaviour {
     public float slideTimer = 1f;
     float currentSlideTimer = 0f;
 
-	// Use this for initialization
-	void Start ()
+    //Building travel
+    BuildingInteraction currentBuildingRef;
+    bool moveIntoBuilding = false;
+    bool moveOutOfBuilding = false;
+
+    bool movingToPoint = false;
+    Vector3 goalLocation;
+
+    // Use this for initialization
+    void Start ()
     {
         currentMoveDirection = MoveDirection.North;
         currentLane = RunningLane.Mid;
-        currentMidLanePos.x = 0f;
+        currentMidLanePos.x = -40f;
     }
 	
 	// Update is called once per frame
@@ -102,6 +111,18 @@ public class PlayerRunner : MonoBehaviour {
                     pAniController.StraightRunAnimation();
                 }
             }
+        }
+        else if(moveIntoBuilding)
+        {
+            MoveToBuildingPoint();
+        }
+        else if(moveOutOfBuilding)
+        {
+            MoveAwayFromBuilding();
+        }
+        else if(movingToPoint)
+        {
+            MoveToPoint();
         }
 	}
 
@@ -148,7 +169,11 @@ public class PlayerRunner : MonoBehaviour {
 
     public void DoLeft()
     {
-        if (canTurn)
+        if (currentBuildingRef != null)
+        {
+            TurnIntoBuilding();
+        }
+        else if (canTurn)
         {
             TurnRunner(-1f);
         }
@@ -235,13 +260,16 @@ public class PlayerRunner : MonoBehaviour {
 
     public void DoRight()
     {
-        if (canTurn)
+        if (currentBuildingRef != null)
+        {
+            TurnIntoBuilding();
+        }
+        else if (canTurn)
         {
             TurnRunner(1f);
         }
         else
         {
-            
                 //Clear left Enemy as you move away
 
                 RunningLane lastLane = currentLane;
@@ -691,7 +719,6 @@ public class PlayerRunner : MonoBehaviour {
                 goalZ = tempVal;
                 break;
         }
-
     }
 
     public void DoBumpRight()
@@ -800,5 +827,90 @@ public class PlayerRunner : MonoBehaviour {
     public void CancelTurnPrep()
     {
         canTurn = false;
+    }
+
+    public void CanTurnIntoBuildingFromLane(BuildingInteraction building)
+    {
+        currentBuildingRef = building;
+    }
+
+    public void BuildingEntered(BuildingInteraction building)
+    {
+        currentBuildingRef = building;
+        doMove = false;
+        gameCamera.WatchObject(currentBuildingRef.cameraHoldPosition.position, currentBuildingRef.cameraNewLookAt);
+    }
+
+    public void CanNoLongerTurnIntoBuildingFromLane(BuildingInteraction building)
+    {
+        if (moveIntoBuilding == false
+            && moveOutOfBuilding == false)
+        {
+            currentBuildingRef = null;
+        }
+    }
+
+    public void TurnIntoBuilding()
+    {
+        moveIntoBuilding = true;
+        doMove = false;
+        gameCamera.WatchObject(currentBuildingRef.cameraHoldPosition.position, currentBuildingRef.cameraNewLookAt);
+    }
+
+    void MoveToBuildingPoint()
+    {
+        transform.position = Vector3.MoveTowards(transform.position, currentBuildingRef.playerInteractionLocation.position, Time.deltaTime);
+        if (Vector3.Distance(transform.position, currentBuildingRef.playerInteractionLocation.position) < 1f)
+        {
+            moveIntoBuilding = false;
+        }
+    }
+
+    public void ExitBuilding()
+    {
+        moveOutOfBuilding = true;
+        gameCamera.WatchPlayer();
+        if(currentBuildingRef.turnPlayerAround)
+        {
+            transform.eulerAngles += new Vector3(0f, 180f, 0f);
+            int moveDir = (int)currentMoveDirection + 2;
+            if(moveDir > 4)
+            {
+                moveDir -= 4;
+            }
+            currentMoveDirection = (MoveDirection)moveDir;
+        }
+    }
+
+    void MoveAwayFromBuilding()
+    {
+        transform.position = Vector3.MoveTowards(transform.position, currentBuildingRef.exitLocation.position, Time.deltaTime);
+        if (Vector3.Distance(transform.position, currentBuildingRef.exitLocation.position) < 1f)
+        {
+            moveOutOfBuilding = false;
+            BuildingExited();
+        }
+    }
+
+    void BuildingExited()
+    {
+        doMove = true;
+        currentBuildingRef = null;
+    }
+
+    public void MovePlayerToLocation(Vector3 waitPoint)
+    {
+        movingToPoint = true;
+        doMove = false;
+        goalLocation = waitPoint;
+    }
+
+    void MoveToPoint()
+    {
+        transform.position = Vector3.MoveTowards(transform.position, goalLocation, Time.deltaTime);
+        if (Vector3.Distance(transform.position, goalLocation) < 1f)
+        {
+            movingToPoint = false;
+        }
     }
 }

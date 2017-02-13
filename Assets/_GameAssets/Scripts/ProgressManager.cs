@@ -3,21 +3,24 @@ using System.Collections;
 
 public class ProgressManager : MonoBehaviour {
 
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+    [Header("References")]
+    public ResourcesManager resourcesMan;
+
+    [Header("Progress stats")]
+    [Range(0, 1)]
+    public float percentageToSave = 0f;
 
     public void SaveProgress()
     {
         Debug.Log("Saving progress");
-        //Scores
+        //Scores??
 
         //Resources
+        resourcesMan.SaveAllTempResources();
+    }
+
+    public void LoseProgress()
+    {
+        resourcesMan.SavePercentageOfTempResources(percentageToSave);
     }
 }

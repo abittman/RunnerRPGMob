@@ -29,8 +29,12 @@ public class PathBuilderv2 : MonoBehaviour {
         bool enteredNewArea = false;
 
         //[TODO] temporary? Will town pieces be BPP?
-        if(currentBPP != null)
+        if (currentBPP != null
+            && ((currentPathArea.thisAreaFormat != AreaFormat.Fixed)
+                || (currentPathArea.thisAreaFormat == AreaFormat.Fixed && currentPathProgress == 0)))
+        {
             ppMan.DeactivatePieces(currentBPP, newPieceRef);
+        }
 
         //Current piece is new piece
         currentBPP = newPieceRef;
@@ -382,9 +386,6 @@ public class PathBuilderv2 : MonoBehaviour {
         //Get entrance area to align
         FixedAreaEntrances entranceArea = fixedArea.GetFixedAreaEntranceForAreaType(currentPathArea.thisAreaType);
 
-        //Get original settings of entrancePiece to fixedArea
-        Vector3 pieceOffset = entranceArea.connectedEntrancePathPiece.transform.position - fixedArea.fixedAreaObject.transform.position;
-
         //"Place" entrance piece going left
         //entranceArea.connectedEntrancePathPiece.intendedMoveDirection = GetLeftMoveDirection(exitPiece.intendedMoveDirection);
         //Piece should go straight ahead
@@ -397,41 +398,65 @@ public class PathBuilderv2 : MonoBehaviour {
         //Get rotation where "intended direction" compares to "entrance direction"
         int directionDiff = (int)entranceArea.connectedEntrancePathPiece.intendedMoveDirection
                                 - (int)entranceArea.entranceDirection;
-        
-        Vector3 fixedEul = Vector3.zero;
-        switch (directionDiff)
+        directionDiff++; //Because north is 1
+        if(directionDiff < 1)
         {
-            case 3:
-            case -1:
+            directionDiff += 4;
+        }
+        else if(directionDiff > 4)
+        {
+            directionDiff -= 4;
+        }
+        MoveDirection directionDiffDir = (MoveDirection)directionDiff;
+        Vector3 fixedEul = Vector3.zero;
+        Vector3 newFixedAreaPos = Vector3.zero;
+
+        switch (directionDiffDir)
+        {
+            case MoveDirection.West:
                 fixedEul.y = 270f;
                 break;
-            case 2:
-            case -2:
+            case MoveDirection.South:
                 fixedEul.y = 180f;
                 break;
-            case 1:
-            case -3:
+            case MoveDirection.East:
                 fixedEul.y = 90f;
                 break;
             //exit and move are same
-            case 0:
+            case MoveDirection.North:
                 fixedEul.y = 0f;
                 break;
         }
+        
+        //Update fixed area connection piece directions to work with new rotation
+        for(int i = 0; i < fixedArea.connectionPieces.Count; i++)
+        {
+            int moveDirChange = (int)fixedArea.connectionPieces[i].originalPieceDirection + directionDiff;
+            moveDirChange--;    //Because north is 1
+            if(moveDirChange > 4)
+            {
+                moveDirChange -= 4;
+            }
 
-        //MoveDirection newFixedAreaDirection = (MoveDirection)directionDiff;
-
-        Debug.Log(exitPiece.intendedMoveDirection + " " + entranceArea.connectedEntrancePathPiece.intendedMoveDirection + " " + entranceArea.entranceDirection + " " + directionDiff);
+            fixedArea.connectionPieces[i].connectionPieceDirection = (MoveDirection)moveDirChange;
+        }
+       
+        Debug.Log(exitPiece.intendedMoveDirection + " " + entranceArea.connectedEntrancePathPiece.intendedMoveDirection + " " + entranceArea.entranceDirection + " " + directionDiffDir);
 
         //Adjust town based on entrance
-        
         fixedArea.fixedAreaObject.transform.eulerAngles = fixedEul;
+        
+        //Get original settings of entrancePiece to fixedArea
+        Vector3 pieceOffset = entranceArea.connectedEntrancePathPiece.transform.position - fixedArea.fixedAreaObject.transform.position;
 
         //entranceArea.connectedEntrancePathPiece.transform.position = exitPosition;
-        Debug.Log(exitPosition + " " + pieceOffset);
-        fixedArea.fixedAreaObject.transform.position = exitPosition + pieceOffset;
+        newFixedAreaPos = exitPosition - pieceOffset;
+        Debug.Log(exitPosition + " " + pieceOffset + " " + newFixedAreaPos);
+        fixedArea.fixedAreaObject.transform.position = newFixedAreaPos;
 
         fixedArea.fixedAreaObject.SetActive(true);
+
+        exitPiece.exitLocations[0].connectedFixedArea = fixedArea;
     }
 
     #region positional functions

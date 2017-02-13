@@ -3,6 +3,7 @@ using System.Collections;
 
 public class GameOverManager : MonoBehaviour {
 
+    public ProgressManager progressMan;
     public GameObject gameOverUI;
 
     void Awake()
@@ -12,6 +13,7 @@ public class GameOverManager : MonoBehaviour {
 
 	public void DoGameOver()
     {
+        progressMan.LoseProgress();
         gameOverUI.SetActive(true);
     }
 }

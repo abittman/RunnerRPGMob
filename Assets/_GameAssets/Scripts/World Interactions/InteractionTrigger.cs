@@ -7,8 +7,6 @@ public class InteractionTrigger : MonoBehaviour {
     public UnityEvent triggerEnterEvent;
     public UnityEvent triggerExitEvent;
 
-    public BuildingInteraction building;
-
     void OnTriggerEnter(Collider col)
     {
         if(col.gameObject.tag == "Player")
@@ -17,7 +15,6 @@ public class InteractionTrigger : MonoBehaviour {
             {
                 triggerEnterEvent.Invoke();
             }
-            //building.EnterInteraction();
         }
     }
 
@@ -25,7 +22,6 @@ public class InteractionTrigger : MonoBehaviour {
     {
         if (col.gameObject.tag == "Player")
         {
-            //building.ExitInteraction();
             if(triggerExitEvent != null)
             {
                 triggerExitEvent.Invoke();

@@ -14,4 +14,5 @@ public class PathTurnConditions
 
     public BuiltPathPiece nextLeftPathPiece;
     public BuiltPathPiece nextRightPathPiece;
+    public PathedArea connectedFixedArea;
 }

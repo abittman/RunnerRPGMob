@@ -32,7 +32,7 @@ public class ResourcesManager : MonoBehaviour {
 
     //Need to consider a way in which I can set out a better database of resources here.
     //Perhaps broken down into "types" - does make for a lot of lists. Will need to at least compile them at runtime...
-    List<RunnerResource> allResources = new List<RunnerResource>();
+    public List<RunnerResource> allResources = new List<RunnerResource>();
     [Header("The Database")]
     public List<RunnerResource> woodResources = new List<RunnerResource>();
     public List<RunnerResource> stoneResources = new List<RunnerResource>();
@@ -59,15 +59,6 @@ public class ResourcesManager : MonoBehaviour {
         allResources.AddRange(oreResources);
         allResources.AddRange(fishResources);
         allResources.AddRange(potionResources);
-        //allResources.AddRange(gatherEquipment);
-
-	    //Copy all resource types to current run resources
-        for(int i = 0; i < allResources.Count; i++)
-        {
-            currentRunResources.Add(allResources[i]);
-            //Problem here - linked values. Need to be copies.
-            //currentRunResources[i].resourceVal = 0;
-        }
 	}
 	
 	// Update is called once per frame
@@ -88,21 +79,10 @@ public class ResourcesManager : MonoBehaviour {
         resourceGameUI.ResourcePickedUp(resourceAdded);
     }
 
-    /*
-    public void AddResource(ResourceType typeToAdd, int addAmount)
-    {
-        RunnerResource rr = currentRunResources.Find(x => x.resourceType == typeToAdd);
-        rr.resourceVal += addAmount;
-
-        //UpdateUI();
-        resourceGameUI.ResourcePickedUp(rr, addAmount);
-    }*/
-
     public void SpendResource(ResourceType typeToAdd, int removeAmount)
     {
         allResources.Find(x => x.resourceType == typeToAdd).resourceVal -= removeAmount;
-
-        //UpdateUI();
+        //Check current and all? Take out of current first?
     }
 
     public bool ResourceHasAmount(ResourceType typeToAdd, int checkAmount, bool includeCurrentResources)
@@ -118,12 +98,23 @@ public class ResourcesManager : MonoBehaviour {
         }
     }
 
-    public void SaveHalfTempResources()
+    public void SavePercentageOfTempResources(float savePercentage)
     {
         for (int i = 0; i < currentRunResources.Count; i++)
         {
             RunnerResource addRes = allResources.Find(x => x.resourceType == currentRunResources[i].resourceType);
-            addRes.resourceVal += (currentRunResources[i].resourceVal / 2);
+            int amountToAdd = (int)((float)currentRunResources[i].resourceVal * savePercentage);
+            if (amountToAdd > 0)
+            {
+                if (addRes != null)
+                {
+                    addRes.resourceVal += amountToAdd;
+                }
+                else
+                {
+                    allResources.Add(currentRunResources[i]);
+                }
+            }
         }
 
         currentRunResources.Clear();
@@ -134,9 +125,18 @@ public class ResourcesManager : MonoBehaviour {
         for(int i = 0; i< currentRunResources.Count; i++)
         {
             RunnerResource addRes = allResources.Find(x => x.resourceType == currentRunResources[i].resourceType);
-            addRes.resourceVal += currentRunResources[i].resourceVal;
+            if (addRes != null)
+            {
+                addRes.resourceVal += currentRunResources[i].resourceVal;
+            }
+            else
+            {
+                allResources.Add(currentRunResources[i]);
+            }
         }
 
         currentRunResources.Clear();
     }
+
+    //[TODO] Make a unique item drop on death that a player can retrieve at a later date
 }

@@ -3,32 +3,40 @@ using System.Collections;
 
 public class BuildingInteraction : MonoBehaviour {
 
-    public GameObject uiPanelToActivate;
+    public Transform playerInteractionLocation;
+    public RunningLane canTurnFromLane;
 
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+    public PlayerRunner pRunner;
+    
+    public Transform cameraHoldPosition;
+    public Transform cameraNewLookAt;
+
+    public Transform exitLocation;
+
+    public GameObject linkedUIRef;
+
+    public bool turnPlayerAround = false;
+
+    public void PrepareInteraction()
+    {
+        if(pRunner.doMove)
+            pRunner.CanTurnIntoBuildingFromLane(this);
+    }
 
     public void EnterInteraction()
     {
-        if(uiPanelToActivate != null)
+        if (pRunner.doMove)
         {
-            uiPanelToActivate.SetActive(true);
+            pRunner.BuildingEntered(this);
+            linkedUIRef.SetActive(true);
         }
     }
 
     public void ExitInteraction()
     {
-
-        if (uiPanelToActivate != null)
+        if (pRunner.doMove)
         {
-            uiPanelToActivate.SetActive(false);
+            pRunner.CanNoLongerTurnIntoBuildingFromLane(this);
         }
     }
 }

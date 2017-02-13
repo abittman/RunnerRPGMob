@@ -10,10 +10,15 @@ public class TownBuilding
 
     public List<RunnerResource> requiredBuildingResources = new List<RunnerResource>();
 
+    public GameObject unbuiltUI;
+    public GameObject builtUI;
+
     public void BuildBuilding()
     {
         buildingObject_unbuilt.SetActive(false);
+        unbuiltUI.SetActive(false);
         buildingObject_built.SetActive(true);
+        builtUI.SetActive(true);
     }
 }
 

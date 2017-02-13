@@ -36,16 +36,6 @@ public class EquipmentManager : MonoBehaviour {
 
     public List<EquipmentItem> pickEquipments = new List<EquipmentItem>();
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
-
     public bool HasRequiredEquipment(EquipmentType type, int level)
     {
         switch(type)
@@ -72,5 +62,19 @@ public class EquipmentManager : MonoBehaviour {
 
         //Catch all
         return false;
+    }
+
+    //[TODO] Link this to the ability to give new equipment (perhaps with reource manager)
+    public void ObtainedNewEquipment(EquipmentItem newItem)
+    {
+        switch(newItem.equipType)
+        {
+            case EquipmentType.Wood_Cutting:
+                axeEquipments.Add(newItem);
+                break;
+            case EquipmentType.Ore_Mining:
+                pickEquipments.Add(newItem);
+                break;
+        }
     }
 }

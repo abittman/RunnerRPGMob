@@ -206,7 +206,8 @@ public class PathPoolManager : MonoBehaviour {
         for (int i = 0; i < lastPiece.exitLocations.Count; i++)
         {
             //If player did not turn left here, disable it
-            if(lastPiece.exitLocations[i].nextLeftPathPiece != currentPiece)
+            if(lastPiece.exitLocations[i].nextLeftPathPiece != currentPiece
+                && lastPiece.exitLocations[i].nextLeftPathPiece != null)
             {
                 PathedArea altPA = GetAreaForBuiltPathPiece(lastPiece.exitLocations[i].nextLeftPathPiece);
 
@@ -215,9 +216,18 @@ public class PathPoolManager : MonoBehaviour {
                     lastPiece.exitLocations[i].nextLeftPathPiece.DeactivateToPool();
                     for (int j = 0; j < lastPiece.exitLocations[i].nextLeftPathPiece.exitLocations.Count; j++)
                     {
-                        lastPiece.exitLocations[i].nextLeftPathPiece.exitLocations[j].nextLeftPathPiece.DeactivateToPool();
-
-                        lastPiece.exitLocations[i].nextLeftPathPiece.exitLocations[j].nextRightPathPiece.DeactivateToPool();
+                        if (lastPiece.exitLocations[i].nextLeftPathPiece.exitLocations[j].nextLeftPathPiece != null)
+                        {
+                            lastPiece.exitLocations[i].nextLeftPathPiece.exitLocations[j].nextLeftPathPiece.DeactivateToPool();
+                        }
+                        if (lastPiece.exitLocations[i].nextLeftPathPiece.exitLocations[j].nextRightPathPiece != null)
+                        {
+                            lastPiece.exitLocations[i].nextLeftPathPiece.exitLocations[j].nextRightPathPiece.DeactivateToPool();
+                        }
+                        if(lastPiece.exitLocations[i].nextLeftPathPiece.exitLocations[j].connectedFixedArea.fixedAreaObject != null)
+                        {
+                            lastPiece.exitLocations[i].nextLeftPathPiece.exitLocations[j].connectedFixedArea.fixedAreaObject.SetActive(false);
+                        }
                     }
                 }
                 else
@@ -226,7 +236,8 @@ public class PathPoolManager : MonoBehaviour {
                 }
             }
             //If player did not turn right here, disable it
-            if (lastPiece.exitLocations[i].nextRightPathPiece != currentPiece)
+            if (lastPiece.exitLocations[i].nextRightPathPiece != currentPiece
+                && lastPiece.exitLocations[i].nextRightPathPiece != null)
             {
                 PathedArea altPA = GetAreaForBuiltPathPiece(lastPiece.exitLocations[i].nextRightPathPiece);
 
@@ -235,9 +246,18 @@ public class PathPoolManager : MonoBehaviour {
                     lastPiece.exitLocations[i].nextRightPathPiece.DeactivateToPool();
                     for (int j = 0; j < lastPiece.exitLocations[i].nextRightPathPiece.exitLocations.Count; j++)
                     {
-                        lastPiece.exitLocations[i].nextRightPathPiece.exitLocations[j].nextLeftPathPiece.DeactivateToPool();
-
-                        lastPiece.exitLocations[i].nextRightPathPiece.exitLocations[j].nextRightPathPiece.DeactivateToPool();
+                        if (lastPiece.exitLocations[i].nextRightPathPiece.exitLocations[j].nextLeftPathPiece != null)
+                        {
+                            lastPiece.exitLocations[i].nextRightPathPiece.exitLocations[j].nextLeftPathPiece.DeactivateToPool();
+                        }
+                        if (lastPiece.exitLocations[i].nextRightPathPiece.exitLocations[j].nextRightPathPiece != null)
+                        {
+                            lastPiece.exitLocations[i].nextRightPathPiece.exitLocations[j].nextRightPathPiece.DeactivateToPool();
+                        }
+                        if (lastPiece.exitLocations[i].nextRightPathPiece.exitLocations[j].connectedFixedArea.fixedAreaObject != null)
+                        {
+                            lastPiece.exitLocations[i].nextRightPathPiece.exitLocations[j].connectedFixedArea.fixedAreaObject.SetActive(false);
+                        }
                     }
                 }
                 else

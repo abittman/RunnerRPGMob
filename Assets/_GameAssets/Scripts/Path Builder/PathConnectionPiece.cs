@@ -9,6 +9,7 @@ public class PathConnectionPiece {
     public AreaTypes areaFrom;
     public AreaTypes areaTo;
     //[TODO] Get from bpp
+    public MoveDirection originalPieceDirection;
     public MoveDirection connectionPieceDirection;
     public int minPosToOffer;
 }
