@@ -51,7 +51,7 @@ public class WorldEvent : MonoBehaviour {
         //Give items also
         for(int i = 0; i < eventGiveResources.Count; i++)
         {
-            worldEventMan.resourcesMan.AddResource(eventGiveResources[i]);
+            worldEventMan.resourcesMan.AddResource(eventGiveResources[i], false);
         }
         for (int i = 0; i < eventGiveEquipments.Count; i++)
         {

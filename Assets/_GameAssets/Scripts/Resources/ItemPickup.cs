@@ -63,7 +63,7 @@ public class ItemPickup : MonoBehaviour {
 
     void DeactivatePickup()
     {
-        resourcesMan.AddResource(resourceVal);
+        resourcesMan.AddResource(resourceVal, false);
         gameObject.SetActive(false);
     }
 }

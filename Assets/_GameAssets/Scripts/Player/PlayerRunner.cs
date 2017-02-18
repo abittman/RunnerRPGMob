@@ -73,10 +73,10 @@ public class PlayerRunner : MonoBehaviour {
 
     //Building travel
     BuildingInteraction currentBuildingRef;
-    bool moveIntoBuilding = false;
+    public bool moveIntoBuilding = false;
     bool moveOutOfBuilding = false;
 
-    bool movingToPoint = false;
+    public bool movingToPoint = false;
     Vector3 goalLocation;
 
     // Use this for initialization

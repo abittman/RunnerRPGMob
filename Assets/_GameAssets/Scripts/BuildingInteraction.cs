@@ -23,9 +23,18 @@ public class BuildingInteraction : MonoBehaviour {
             pRunner.CanTurnIntoBuildingFromLane(this);
     }
 
+    public void MovePlayerToBuilding()
+    {
+        if(pRunner.doMove)
+        {
+            pRunner.MovePlayerToLocation(playerInteractionLocation.position);
+        }
+    }
+
     public void EnterInteraction()
     {
-        if (pRunner.doMove)
+        if (pRunner.moveIntoBuilding
+            || pRunner.movingToPoint)
         {
             pRunner.BuildingEntered(this);
             linkedUIRef.SetActive(true);

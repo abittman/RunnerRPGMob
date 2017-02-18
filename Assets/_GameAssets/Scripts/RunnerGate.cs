@@ -21,7 +21,7 @@ public class RunnerGate : MonoBehaviour {
     {
         if(col.gameObject.layer == LayerMask.NameToLayer("PlayerLayer"))
         {
-            if (GameObject.Find("ResourcesManager").GetComponent<ResourcesManager>().ResourceHasAmount(requiredResource.resourceType, requiredResource.resourceVal, true))
+            if (GameObject.Find("ResourcesManager").GetComponent<ResourcesManager>().ResourceHasAmount(requiredResource, true))
             {
                 foreach(GameObject g in collisionObjects)
                 {

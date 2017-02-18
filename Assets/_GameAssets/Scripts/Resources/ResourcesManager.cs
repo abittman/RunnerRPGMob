@@ -13,6 +13,7 @@ public class RunnerResource
     public ResourceType resourceType;
     public string resourceName;
     public int resourceVal = 0;
+    public Sprite associatedIcon;
 }
 
 public enum ResourceType
@@ -25,7 +26,8 @@ public enum ResourceType
     Fish,
     Food,
     Potion,
-    Ability_Equipment
+    Ability_Equipment,
+    Golem
 }
 
 public class ResourcesManager : MonoBehaviour {
@@ -43,6 +45,7 @@ public class ResourcesManager : MonoBehaviour {
     public List<RunnerResource> potionResources = new List<RunnerResource>();
 
     //public List<RunnerResource> gatherEquipment = new List<RunnerResource>();
+    public List<RunnerResource> golems = new List<RunnerResource>();
 
     [Header("Current Run")]
     public List<RunnerResource> currentRunResources = new List<RunnerResource>();
@@ -66,15 +69,29 @@ public class ResourcesManager : MonoBehaviour {
 	
 	}
 
-    public void AddResource(RunnerResource resourceAdded)
+    public void AddResource(RunnerResource resourceAdded, bool saveToMain)
     {
-        if (currentRunResources.Exists(x => x.resourceName == resourceAdded.resourceName))
+        if (saveToMain == false)
         {
-            currentRunResources.Find(x => x.resourceName == resourceAdded.resourceName).resourceVal += resourceAdded.resourceVal;
+            if (currentRunResources.Exists(x => x.resourceName == resourceAdded.resourceName))
+            {
+                currentRunResources.Find(x => x.resourceName == resourceAdded.resourceName).resourceVal += resourceAdded.resourceVal;
+            }
+            else
+            {
+                currentRunResources.Add(resourceAdded);
+            }
         }
         else
         {
-            currentRunResources.Add(resourceAdded);
+            if (allResources.Exists(x => x.resourceName == resourceAdded.resourceName))
+            {
+                allResources.Find(x => x.resourceName == resourceAdded.resourceName).resourceVal += resourceAdded.resourceVal;
+            }
+            else
+            {
+                allResources.Add(resourceAdded);
+            }
         }
         resourceGameUI.ResourcePickedUp(resourceAdded);
     }
@@ -85,10 +102,61 @@ public class ResourcesManager : MonoBehaviour {
         //Check current and all? Take out of current first?
     }
 
-    public bool ResourceHasAmount(ResourceType typeToAdd, int checkAmount, bool includeCurrentResources)
+    public void SpendResource(RunnerResource spendRes)
     {
-        if (allResources.Find(x => x.resourceType == typeToAdd).resourceVal >= checkAmount
-            || (includeCurrentResources == true && currentRunResources.Find(x => x.resourceType == typeToAdd).resourceVal >= checkAmount))
+        int amountRemaining = spendRes.resourceVal;
+        //Subtract from current first
+        RunnerResource currRef = currentRunResources.Find(x => x.resourceName == spendRes.resourceName);
+
+        if(currRef != null)
+        {
+            if(currRef.resourceVal >= amountRemaining)
+            {
+                currRef.resourceVal -= amountRemaining;
+                amountRemaining = 0;
+            }
+            else
+            {
+                amountRemaining -= currRef.resourceVal;
+                currRef.resourceVal -= currRef.resourceVal;
+            }
+        }
+
+        //If there is remaining, now check all resources
+        if (amountRemaining > 0)
+        {
+            RunnerResource allRef = allResources.Find(x => x.resourceName == spendRes.resourceName);
+            if (allRef != null)
+            {
+                if(allRef.resourceVal >= amountRemaining)
+                {
+                    allRef.resourceVal -= amountRemaining;
+                }
+                else
+                {
+                    Debug.LogError("[RESOURCE] attempting to spend more resources than are available");
+                }
+            }
+        }
+    }
+
+    public bool ResourceHasAmount(RunnerResource resourceCheck, bool includeCurrentResources)
+    {
+        RunnerResource allRef = allResources.Find(x => x.resourceName == resourceCheck.resourceName);
+        RunnerResource currRef = currentRunResources.Find(x => x.resourceName == resourceCheck.resourceName);
+
+        int currentAmount = 0;
+        //If item exists in both, add together
+        if(allRef != null)
+        {
+            currentAmount += allRef.resourceVal;
+        }
+        if(currRef != null)
+        {
+            currentAmount += allRef.resourceVal;
+        }
+
+        if(currentAmount >= resourceCheck.resourceVal)
         {
             return true;
         }
