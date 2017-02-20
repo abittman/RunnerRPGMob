@@ -1,12 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 [System.Serializable]
 public class ResourceNodeDropItem
 {
     public GameObject asssociatedGameObject;
     public float percentageChance;
+    public int amountToDrop = 1;
 }
 
 [System.Serializable]
@@ -45,6 +47,13 @@ public class ResourceNode : MonoBehaviour {
     public float gatherTick = 0f;
     float lastGatherTime = 0f;
 
+    public GameObject warningCanvas;
+    public Image collectionDisplay;
+    public Sprite canCollectTexture;
+    public Sprite cannotCollectTexture;
+
+    public bool canGather = false;
+
     void Start()
     {
         equipMan = GameObject.Find("ResourcesManager").GetComponent<EquipmentManager>();
@@ -58,12 +67,35 @@ public class ResourceNode : MonoBehaviour {
         }
     }
 
+    public void SetupNode()
+    {
+        if (equipMan.HasRequiredEquipment(equipmentTypeToHarvest, equipmentLevelToHarvest))
+        {
+            canGather = true;
+        }
+        else
+        {
+            canGather = false;
+        }
+
+        if(canGather)
+        {
+            collectionDisplay.sprite = canCollectTexture;
+        }
+        else
+        {
+            collectionDisplay.sprite = cannotCollectTexture;
+        }
+
+        ActivateNode();
+    }
+
     void OnTriggerEnter(Collider col)
     {
         if (col.gameObject.layer == LayerMask.NameToLayer("PlayerLayer"))
         {
             //If player has required item
-            if (equipMan.HasRequiredEquipment(equipmentTypeToHarvest, equipmentLevelToHarvest))
+            if (canGather)
             {
                 switch(gatherType)
                 {
@@ -95,7 +127,7 @@ public class ResourceNode : MonoBehaviour {
         if (col.gameObject.layer == LayerMask.NameToLayer("PlayerLayer"))
         {
             //If player has required item
-            if (equipMan.HasRequiredEquipment(equipmentTypeToHarvest, equipmentLevelToHarvest))
+            if (canGather)
             {
                 switch (gatherType)
                 {
@@ -124,9 +156,12 @@ public class ResourceNode : MonoBehaviour {
             float randomVal = Random.Range(0f, 1f);
             if(randomVal <= dropTable.thisNodeDropItems[i].percentageChance)
             {
-                GameObject g = Instantiate(dropTable.thisNodeDropItems[i].asssociatedGameObject, transform);
-                g.GetComponent<ItemPickup>().playerTransformRef = colliderRef;
-                g.GetComponent<ItemPickup>().ThrowForward();
+                for (int j = 0; j < dropTable.thisNodeDropItems[i].amountToDrop; j++)
+                {
+                    GameObject g = Instantiate(dropTable.thisNodeDropItems[i].asssociatedGameObject, transform);
+                    g.GetComponent<ItemPickup>().playerTransformRef = colliderRef;
+                    g.GetComponent<ItemPickup>().ThrowForward();
+                }
             }
         }
     }

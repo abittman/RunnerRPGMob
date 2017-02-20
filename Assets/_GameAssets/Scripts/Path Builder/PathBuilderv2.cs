@@ -38,6 +38,7 @@ public class PathBuilderv2 : MonoBehaviour {
 
         //Current piece is new piece
         currentBPP = newPieceRef;
+        currentBPP.PlayerOnThisPiece();
 
         currentPathProgress++;
 

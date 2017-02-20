@@ -6,12 +6,17 @@ public class PathPoolGroup : MonoBehaviour {
 
     public PathedArea thisPathedArea;
 
+    [Space]
+
     //Combines pieces in area lists
     public List<BuiltPathPiece> allPoolPieces = new List<BuiltPathPiece>();
 
     //Showonly
     public BuiltPathPiece pathFirstLeftPiece;
     public BuiltPathPiece pathFirstRightPiece;
+
+    [Header("Local References")]
+    public List<ResourceNode> fixedAreaResourceNodes = new List<ResourceNode>();
 
     public void SetupPoolGroup()
     {
@@ -25,5 +30,13 @@ public class PathPoolGroup : MonoBehaviour {
     public List<BuiltPathPiece> GetOnlyInactivePoolPieces()
     {
         return allPoolPieces.FindAll(x => x.isActive == false);
+    }
+
+    public void Fixed_SetupLocalReferences()
+    {
+        for(int i = 0; i < fixedAreaResourceNodes.Count; i++)
+        {
+            fixedAreaResourceNodes[i].SetupNode();
+        }
     }
 }

@@ -12,36 +12,36 @@ public enum EquipmentType
     Fishing
 }
 
-public enum EquipmentStatus
-{
-    None,
-    Past,
-    Current,
-    Next,
-    Future
-}
-
 [System.Serializable]
 public class EquipmentItem
 {
     public string equipmentName;
     public EquipmentType equipType;
     public int equipLevel;
-    public EquipmentStatus equipStatus;
+    public bool isObtained = false;
 }
 
 public class EquipmentManager : MonoBehaviour {
 
     public List<EquipmentItem> axeEquipments = new List<EquipmentItem>();
+    EquipmentItem currentAxe;
 
     public List<EquipmentItem> pickEquipments = new List<EquipmentItem>();
+    EquipmentItem currentPick;
+
+    void Start()
+    {
+        //Temp
+        currentAxe = axeEquipments[0];
+    }
 
     public bool HasRequiredEquipment(EquipmentType type, int level)
     {
         switch(type)
         {
             case EquipmentType.Wood_Cutting:
-                if(axeEquipments.Find(x => x.equipStatus == EquipmentStatus.Current).equipLevel >= level)
+                Debug.Log(currentAxe.equipmentName + " " + currentAxe.equipLevel);
+                if(currentAxe.equipLevel >= level)
                 {
                     return true;
                 }
@@ -50,7 +50,7 @@ public class EquipmentManager : MonoBehaviour {
                     return false;
                 }
             case EquipmentType.Ore_Mining:
-                if (pickEquipments.Find(x => x.equipStatus == EquipmentStatus.Current).equipLevel >= level)
+                if (currentPick.equipLevel >= level)
                 {
                     return true;
                 }
@@ -67,13 +67,54 @@ public class EquipmentManager : MonoBehaviour {
     //[TODO] Link this to the ability to give new equipment (perhaps with reource manager)
     public void ObtainedNewEquipment(EquipmentItem newItem)
     {
+        EquipmentItem localRef = null;
         switch(newItem.equipType)
         {
             case EquipmentType.Wood_Cutting:
-                axeEquipments.Add(newItem);
+                localRef = axeEquipments.Find(x => x.equipmentName == newItem.equipmentName);
+                if (localRef != null)
+                {
+                    localRef.isObtained = true;
+                }
+                else
+                {
+                    axeEquipments.Add(newItem);
+                }
+
+                if (currentAxe == null)
+                {
+                    currentAxe = localRef;
+                }
+                else
+                {
+                    if (currentAxe.equipLevel < localRef.equipLevel)
+                    {
+                        currentAxe = localRef;
+                    }
+                }
                 break;
             case EquipmentType.Ore_Mining:
-                pickEquipments.Add(newItem);
+                localRef = pickEquipments.Find(x => x.equipmentName == newItem.equipmentName);
+                if (localRef != null)
+                {
+                    localRef.isObtained = true;
+                }
+                else
+                {
+                    pickEquipments.Add(newItem);
+                }
+
+                if (currentPick == null)
+                {
+                    currentPick = localRef;
+                }
+                else
+                {
+                    if(currentPick.equipLevel < localRef.equipLevel)
+                    {
+                        currentPick = localRef;
+                    }
+                }
                 break;
         }
     }

@@ -21,12 +21,9 @@ public enum ResourceType
     None,
     Wood,
     Stone,
-    Crop,
+    Organic_Material,
     Ore,
-    Fish,
-    Food,
-    Potion,
-    Ability_Equipment,
+    Magic,
     Golem
 }
 
@@ -38,14 +35,14 @@ public class ResourcesManager : MonoBehaviour {
     [Header("The Database")]
     public List<RunnerResource> woodResources = new List<RunnerResource>();
     public List<RunnerResource> stoneResources = new List<RunnerResource>();
-    public List<RunnerResource> cropResources = new List<RunnerResource>();
+    public List<RunnerResource> organicResources = new List<RunnerResource>();
     public List<RunnerResource> oreResources = new List<RunnerResource>();
-    public List<RunnerResource> fishResources = new List<RunnerResource>();
+    public List<RunnerResource> magicResources = new List<RunnerResource>();
 
-    public List<RunnerResource> potionResources = new List<RunnerResource>();
-
-    //public List<RunnerResource> gatherEquipment = new List<RunnerResource>();
+    //public List<RunnerResource> potionResources = new List<RunnerResource>();
     public List<RunnerResource> golems = new List<RunnerResource>();
+
+    public List<RunnerResource> keyItems = new List<RunnerResource>();
 
     [Header("Current Run")]
     public List<RunnerResource> currentRunResources = new List<RunnerResource>();
@@ -58,15 +55,12 @@ public class ResourcesManager : MonoBehaviour {
         //Make allresources a total of other lists
         allResources.AddRange(woodResources);
         allResources.AddRange(stoneResources);
-        allResources.AddRange(cropResources);
+        allResources.AddRange(organicResources);
         allResources.AddRange(oreResources);
-        allResources.AddRange(fishResources);
-        allResources.AddRange(potionResources);
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
+        allResources.AddRange(magicResources);
+        //allResources.AddRange(potionResources);
+        allResources.AddRange(golems);
+        allResources.AddRange(keyItems);
 	}
 
     public void AddResource(RunnerResource resourceAdded, bool saveToMain)
@@ -153,8 +147,11 @@ public class ResourcesManager : MonoBehaviour {
         }
         if(currRef != null)
         {
-            currentAmount += allRef.resourceVal;
+            currentAmount += currRef.resourceVal;
         }
+
+        //Debug.Log("Check if there are " + resourceCheck.resourceVal + " " + resourceCheck.resourceName
+       //             + ". \n There are " + currentAmount + " found in all and current");
 
         if(currentAmount >= resourceCheck.resourceVal)
         {

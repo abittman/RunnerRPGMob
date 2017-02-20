@@ -43,9 +43,9 @@ public class BuiltPathPiece : MonoBehaviour {
 
     public void PlayerOnThisPiece()
     {
-        for(int i = 0; i < linkedEnemies.Count; i++)
+        for(int i = 0; i < resourceNodes.Count; i++)
         {
-            linkedEnemies[i].EnemyActivated();
+            resourceNodes[i].SetupNode();
         }
     }
 

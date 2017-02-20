@@ -23,4 +23,15 @@ public class ProgressManager : MonoBehaviour {
     {
         resourcesMan.SavePercentageOfTempResources(percentageToSave);
     }
+
+    //[TODO] Determine good ways to save data. Large playerprefs solution? JSON data (but will need to encode?)
+    public void SaveData()
+    {
+
+    }
+
+    public void ResetData()
+    {
+
+    }
 }

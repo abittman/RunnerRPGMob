@@ -20,7 +20,8 @@ public enum AreaTypes
     Cave,
     Cave_Dungeon,
     Coast,
-    Forest_Camp
+    Forest_Camp,
+    Autumn_Grove
 }
 
 public class PathBuilder : MonoBehaviour

@@ -60,9 +60,14 @@ public class PathPoolManager : MonoBehaviour {
     public void MoveToNewArea(AreaTypes aType)
     {
         currentPathPoolGroup = allPathedAreas.Find(x => x.thisPathedArea.thisAreaType == aType);
+
         if (currentPathPoolGroup == null)
         {
             Debug.LogError("Invalid area type set as starting area.");
+        }
+        else
+        {
+            currentPathPoolGroup.Fixed_SetupLocalReferences();
         }
     }
 
