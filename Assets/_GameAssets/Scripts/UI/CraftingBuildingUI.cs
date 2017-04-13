@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CraftingBuildingUI : MonoBehaviour {
+public class CraftingBuildingUI : UIScreen {
 
     public CraftingBuilding thisBuilding;
 
@@ -19,6 +19,16 @@ public class CraftingBuildingUI : MonoBehaviour {
 
     public int currentItemID;
 
+    public override void ActivateScreen()
+    {
+        base.ActivateScreen();
+    }
+
+    public override void DeactivateScreen()
+    {
+        base.DeactivateScreen();
+    }
+
     public void SetupCraftUI()
     {
         for(int i = 0; i < thisBuilding.craftableItems.Count; i++)
@@ -33,7 +43,7 @@ public class CraftingBuildingUI : MonoBehaviour {
     public void CraftItemButtonPressed(int buttonID)
     {
         //selectedItemName.text = thisBuilding.craftableItems[buttonID].craftedItem.resourceName;
-        selectedItemImage.sprite = thisBuilding.craftableItems[buttonID].craftedItem.associatedIcon;
+        //selectedItemImage.sprite = thisBuilding.craftableItems[buttonID].craftedItem.associatedIcon;
 
         requiredItemText_1.text = thisBuilding.craftableItems[buttonID].resourcesRequiredToCraft[0].resourceName;
         requiredItemText_2.text = thisBuilding.craftableItems[buttonID].resourcesRequiredToCraft[1].resourceName;

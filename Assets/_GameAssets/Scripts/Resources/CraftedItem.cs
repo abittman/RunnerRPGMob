@@ -15,4 +15,6 @@ public class CraftedItem
     //Whether or not crafting the item unlocks it (adds to all resources)
     //  or whether it just adds it to the bag (potentially temporary)
     public bool safeItem = true;
+
+    public WorldEvent associatedWorldEvent;
 }

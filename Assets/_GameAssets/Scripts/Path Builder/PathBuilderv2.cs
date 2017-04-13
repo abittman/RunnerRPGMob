@@ -113,6 +113,7 @@ public class PathBuilderv2 : MonoBehaviour {
         for (int i = 0; i < currentPathArea.connectionPieces.Count; i++)
         {
             PathedArea connectedPathArea = ppMan.GetAreaOfType(currentPathArea.connectionPieces[i].areaTo);
+            Debug.Log("Build extensions for " + connectedPathArea.thisAreaType);
             //For each connection exit piece
             //Get Exit Location ref
             BuiltPathPiece extensionBPP = currentPathArea.connectionPieces[i].thisConnectionPiece;
@@ -134,16 +135,16 @@ public class PathBuilderv2 : MonoBehaviour {
                 switch (leftPiece.intendedMoveDirection)
                 {
                     case MoveDirection.North:
-                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.northPiece = leftPiece.connectedPathPiece;
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.northPiece = leftPiece;
                         break;
                     case MoveDirection.East:
-                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.eastPiece = leftPiece.connectedPathPiece;
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.eastPiece = leftPiece;
                         break;
                     case MoveDirection.South:
-                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.southPiece = leftPiece.connectedPathPiece;
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.southPiece = leftPiece;
                         break;
                     case MoveDirection.West:
-                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.westPiece = leftPiece.connectedPathPiece;
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.westPiece = leftPiece;
                         break;
                 }
 
@@ -166,16 +167,16 @@ public class PathBuilderv2 : MonoBehaviour {
                 switch (rightPiece.intendedMoveDirection)
                 {
                     case MoveDirection.North:
-                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.northPiece = rightPiece.connectedPathPiece;
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.northPiece = rightPiece;
                         break;
                     case MoveDirection.East:
-                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.eastPiece = rightPiece.connectedPathPiece;
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.eastPiece = rightPiece;
                         break;
                     case MoveDirection.South:
-                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.southPiece = rightPiece.connectedPathPiece;
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.southPiece = rightPiece;
                         break;
                     case MoveDirection.West:
-                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.westPiece = rightPiece.connectedPathPiece;
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.westPiece = rightPiece;
                         break;
                 }
                 //Activate piece
@@ -257,16 +258,16 @@ public class PathBuilderv2 : MonoBehaviour {
                 switch (leftPiece.intendedMoveDirection)
                 {
                     case MoveDirection.North:
-                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.northPiece = leftPiece.connectedPathPiece;
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.northPiece = leftPiece;
                         break;
                     case MoveDirection.East:
-                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.eastPiece = leftPiece.connectedPathPiece;
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.eastPiece = leftPiece;
                         break;
                     case MoveDirection.South:
-                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.southPiece = leftPiece.connectedPathPiece;
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.southPiece = leftPiece;
                         break;
                     case MoveDirection.West:
-                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.westPiece = leftPiece.connectedPathPiece;
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.westPiece = leftPiece;
                         break;
                 }
 
@@ -289,16 +290,16 @@ public class PathBuilderv2 : MonoBehaviour {
                 switch (rightPiece.intendedMoveDirection)
                 {
                     case MoveDirection.North:
-                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.northPiece = rightPiece.connectedPathPiece;
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.northPiece = rightPiece;
                         break;
                     case MoveDirection.East:
-                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.eastPiece = rightPiece.connectedPathPiece;
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.eastPiece = rightPiece;
                         break;
                     case MoveDirection.South:
-                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.southPiece = rightPiece.connectedPathPiece;
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.southPiece = rightPiece;
                         break;
                     case MoveDirection.West:
-                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.westPiece = rightPiece.connectedPathPiece;
+                        extensionBPP.exitLocations[0].connectedTurnTriggerArea.westPiece = rightPiece;
                         break;
                 }
                 //Activate piece
@@ -329,16 +330,16 @@ public class PathBuilderv2 : MonoBehaviour {
                 switch (leftPiece.intendedMoveDirection)
                 {
                     case MoveDirection.North:
-                        bpp.exitLocations[i].connectedTurnTriggerArea.northPiece = leftPiece.connectedPathPiece;
+                        bpp.exitLocations[i].connectedTurnTriggerArea.northPiece = leftPiece;
                         break;
                     case MoveDirection.East:
-                        bpp.exitLocations[i].connectedTurnTriggerArea.eastPiece = leftPiece.connectedPathPiece;
+                        bpp.exitLocations[i].connectedTurnTriggerArea.eastPiece = leftPiece;
                         break;
                     case MoveDirection.South:
-                        bpp.exitLocations[i].connectedTurnTriggerArea.southPiece = leftPiece.connectedPathPiece;
+                        bpp.exitLocations[i].connectedTurnTriggerArea.southPiece = leftPiece;
                         break;
                     case MoveDirection.West:
-                        bpp.exitLocations[i].connectedTurnTriggerArea.westPiece = leftPiece.connectedPathPiece;
+                        bpp.exitLocations[i].connectedTurnTriggerArea.westPiece = leftPiece;
                         break;
                 }
                 //Activate piece
@@ -363,16 +364,16 @@ public class PathBuilderv2 : MonoBehaviour {
                 switch (rightPiece.intendedMoveDirection)
                 {
                     case MoveDirection.North:
-                        bpp.exitLocations[i].connectedTurnTriggerArea.northPiece = rightPiece.connectedPathPiece;
+                        bpp.exitLocations[i].connectedTurnTriggerArea.northPiece = rightPiece;
                         break;
                     case MoveDirection.East:
-                        bpp.exitLocations[i].connectedTurnTriggerArea.eastPiece = rightPiece.connectedPathPiece;
+                        bpp.exitLocations[i].connectedTurnTriggerArea.eastPiece = rightPiece;
                         break;
                     case MoveDirection.South:
-                        bpp.exitLocations[i].connectedTurnTriggerArea.southPiece = rightPiece.connectedPathPiece;
+                        bpp.exitLocations[i].connectedTurnTriggerArea.southPiece = rightPiece;
                         break;
                     case MoveDirection.West:
-                        bpp.exitLocations[i].connectedTurnTriggerArea.westPiece = rightPiece.connectedPathPiece;
+                        bpp.exitLocations[i].connectedTurnTriggerArea.westPiece = rightPiece;
                         break;
                 }
                 //Activate piece
@@ -524,7 +525,8 @@ public class PathBuilderv2 : MonoBehaviour {
     {
         Vector3 nextPos = Vector3.zero;
 
-        Vector3 objectScale = nextPathPiece.objectScale;
+        //[TODO] prob clean up the below based on changes to BPP
+        Vector3 objectScale = nextPathPiece.exitLocations[nextPathPiece.exitLocations.Count - 1].pathTurnLocation.position;
         northAdd = new Vector3(0f, objectScale.y / 2f, objectScale.x / 2f + objectScale.z / 2f);
         southAdd = new Vector3(0f, objectScale.y / 2f, -(objectScale.x / 2f + objectScale.z / 2f));
         eastAdd = new Vector3(objectScale.x / 2f + objectScale.z / 2f, objectScale.y / 2f, 0f);

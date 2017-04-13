@@ -9,6 +9,8 @@ public class WorldObstacles : MonoBehaviour {
 
     public float obstacleHitDamage = 25f;
 
+    public bool obstacleForcesTurn = false;
+
 	void SetupObstacle()
     {
     }
@@ -19,6 +21,10 @@ public class WorldObstacles : MonoBehaviour {
         {
             pStatus.DamageHealth(obstacleHitDamage);
 
+            if(obstacleForcesTurn)
+            {
+                pStatus.pRunner.Bump_ForcePlayerToTurn();
+            }
             if(obstacleIsDestructible)
             {
                 gameObject.SetActive(false);

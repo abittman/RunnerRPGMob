@@ -7,6 +7,7 @@ public class CraftingBuilding : MonoBehaviour {
     [Header("References")]
     public CraftingBuildingUI thisCraftingUI;
     public ResourcesManager resourcesMan;
+    public WorldEventManager eventMan;
     [Space]
     public List<CraftedItem> craftableItems = new List<CraftedItem>();
 
@@ -26,5 +27,10 @@ public class CraftingBuilding : MonoBehaviour {
         resourcesMan.AddResource(craftableItems[itemIndex].craftedItem, craftableItems[itemIndex].safeItem);
         
         craftableItems[itemIndex].craftedStatus = true;
+
+        if(craftableItems[itemIndex].associatedWorldEvent != null)
+        {
+            eventMan.EventFired(craftableItems[itemIndex].associatedWorldEvent);
+        }
     }
 }

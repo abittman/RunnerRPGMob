@@ -13,7 +13,8 @@ public class RunnerResource
     public ResourceType resourceType;
     public string resourceName;
     public int resourceVal = 0;
-    public Sprite associatedIcon;
+    //public Sprite associatedIcon;
+    public string spriteID;
 }
 
 public enum ResourceType
@@ -24,11 +25,14 @@ public enum ResourceType
     Organic_Material,
     Ore,
     Magic,
-    Golem
+    Golem,
+    Key_item,
+    Equipment
 }
 
 public class ResourcesManager : MonoBehaviour {
 
+    public EquipmentManager equipMan;
     //Need to consider a way in which I can set out a better database of resources here.
     //Perhaps broken down into "types" - does make for a lot of lists. Will need to at least compile them at runtime...
     public List<RunnerResource> allResources = new List<RunnerResource>();
@@ -44,13 +48,18 @@ public class ResourcesManager : MonoBehaviour {
 
     public List<RunnerResource> keyItems = new List<RunnerResource>();
 
+    public List<RunnerResource> equipmentItems = new List<RunnerResource>();
+
     [Header("Current Run")]
     public List<RunnerResource> currentRunResources = new List<RunnerResource>();
 
     public ResourceResponsiveUI resourceGameUI;
 
-	// Use this for initialization
-	void Start ()
+    //[TODO] Set this bad boy up. I.e. a drop package of items if the player dies.
+    public List<RunnerResource> droppedPackageResources = new List<RunnerResource>();
+
+    //[TODO] There will need to be a loading order figured out for saving and loading before, or within, start
+	void Awake ()
     {
         //Make allresources a total of other lists
         allResources.AddRange(woodResources);
@@ -61,7 +70,24 @@ public class ResourcesManager : MonoBehaviour {
         //allResources.AddRange(potionResources);
         allResources.AddRange(golems);
         allResources.AddRange(keyItems);
+        allResources.AddRange(equipmentItems);
 	}
+
+    public void SetupResources(List<RunnerResource> setupResources)
+    {
+        allResources.Clear();
+        allResources = setupResources;
+        for(int i = 0; i < allResources.Count; i++)
+        {
+            if(allResources[i].resourceType == ResourceType.Equipment)
+            {
+                if (allResources[i].resourceVal > 0)
+                {
+                    equipMan.ObtainedNewEquipment(allResources[i].resourceName);
+                }
+            }
+        }
+    }
 
     public void AddResource(RunnerResource resourceAdded, bool saveToMain)
     {
@@ -86,6 +112,11 @@ public class ResourcesManager : MonoBehaviour {
             {
                 allResources.Add(resourceAdded);
             }
+        }
+
+        if (resourceAdded.resourceType == ResourceType.Equipment)
+        {
+            equipMan.ObtainedNewEquipment(resourceAdded.resourceName);
         }
         resourceGameUI.ResourcePickedUp(resourceAdded);
     }
@@ -189,7 +220,7 @@ public class ResourcesManager : MonoBehaviour {
     {
         for(int i = 0; i< currentRunResources.Count; i++)
         {
-            RunnerResource addRes = allResources.Find(x => x.resourceType == currentRunResources[i].resourceType);
+            RunnerResource addRes = allResources.Find(x => x.resourceName == currentRunResources[i].resourceName);
             if (addRes != null)
             {
                 addRes.resourceVal += currentRunResources[i].resourceVal;

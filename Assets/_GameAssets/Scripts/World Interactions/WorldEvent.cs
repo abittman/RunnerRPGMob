@@ -14,11 +14,13 @@ public class WorldEvent : MonoBehaviour {
     public WorldEventManager worldEventMan;
     public PlayerRunner pRunner;
     public MainGameplayCamera mainGameCamera;
-
     public ConversationManager conManager;
-    public string associatedConversationID;
 
     [Space]
+    public NarrativeProgress progressEvent;
+
+    public string associatedConversationID;
+
     public Transform playerEventWaitLocation;
 
     public Transform cameraHoldLocation;
@@ -27,7 +29,19 @@ public class WorldEvent : MonoBehaviour {
     public bool fireOnceEvent = true;
 
     public List<RunnerResource> eventGiveResources = new List<RunnerResource>();
-    public List<EquipmentItem> eventGiveEquipments = new List<EquipmentItem>();
+
+    public WorldEvent_Data thisEventData;
+
+    //[TODO] A world event may also have requirements to be "available". So a more elaborate setup is probably required in time.
+    public void SetupEvent(WorldEvent_Data we_Data)
+    {
+        thisEventData = we_Data;
+
+        if(fireOnceEvent == true && thisEventData.hasOccured == true)
+        {
+            gameObject.SetActive(false);
+        }
+    }
 
     //When event is triggered, do all the things to the player and camera
     //[TODO] Move a lot of this to the world event manager most likely
@@ -53,10 +67,6 @@ public class WorldEvent : MonoBehaviour {
         {
             worldEventMan.resourcesMan.AddResource(eventGiveResources[i], false);
         }
-        for (int i = 0; i < eventGiveEquipments.Count; i++)
-        {
-            worldEventMan.equipmentMan.ObtainedNewEquipment(eventGiveEquipments[i]);
-        }
 
         //Reactivate normal play
         mainGameCamera.WatchPlayer();
@@ -65,5 +75,7 @@ public class WorldEvent : MonoBehaviour {
         {
             gameObject.SetActive(false);
         }
+
+        thisEventData.hasOccured = true;
     }
 }

@@ -23,7 +23,16 @@ public enum NodeGatherType
     Continuous_Gather
 }
 
+[System.Serializable]
+public class ResourceNode_Data
+{
+    public string resourceNodeID;
+    public bool nodeIsActive = true;
+}
+
 public class ResourceNode : MonoBehaviour {
+
+    public string optionalUniqueID;
 
     //public RunnerResource requiredToHarvest;
     public EquipmentType equipmentTypeToHarvest;
@@ -33,6 +42,7 @@ public class ResourceNode : MonoBehaviour {
     //public GameObject droppedItemPickup;
     public ResourceNodeDropTable dropTable;
 
+    public bool nodeIsActive = true;
     public bool doesRespawn = true;
 
     public GameObject meshObject;
@@ -54,10 +64,7 @@ public class ResourceNode : MonoBehaviour {
 
     public bool canGather = false;
 
-    void Start()
-    {
-        equipMan = GameObject.Find("ResourcesManager").GetComponent<EquipmentManager>();
-    }
+    public ResourceNode_Data nodeData;
 
     void Update()
     {
@@ -69,25 +76,36 @@ public class ResourceNode : MonoBehaviour {
 
     public void SetupNode()
     {
-        if (equipMan.HasRequiredEquipment(equipmentTypeToHarvest, equipmentLevelToHarvest))
+        Debug.Log("Setup node " + optionalUniqueID);
+
+        equipMan = GameObject.Find("ResourcesManager").GetComponent<EquipmentManager>();
+
+        if (nodeData.nodeIsActive == true)
         {
-            canGather = true;
+            if (equipMan.HasRequiredEquipment(equipmentTypeToHarvest, equipmentLevelToHarvest))
+            {
+                canGather = true;
+            }
+            else
+            {
+                canGather = false;
+            }
+
+            if (canGather)
+            {
+                collectionDisplay.sprite = canCollectTexture;
+            }
+            else
+            {
+                collectionDisplay.sprite = cannotCollectTexture;
+            }
+
+            ActivateNode();
         }
         else
         {
-            canGather = false;
+            DeactivateNode();
         }
-
-        if(canGather)
-        {
-            collectionDisplay.sprite = canCollectTexture;
-        }
-        else
-        {
-            collectionDisplay.sprite = cannotCollectTexture;
-        }
-
-        ActivateNode();
     }
 
     void OnTriggerEnter(Collider col)
@@ -124,29 +142,31 @@ public class ResourceNode : MonoBehaviour {
 
     void OnTriggerStay(Collider col)
     {
-        if (col.gameObject.layer == LayerMask.NameToLayer("PlayerLayer"))
+        if (gatherType == NodeGatherType.Continuous_Gather)
         {
-            //If player has required item
-            if (canGather)
+            if (col.gameObject.layer == LayerMask.NameToLayer("PlayerLayer"))
             {
-                switch (gatherType)
+                //If player has required item
+                if (canGather)
                 {
-                    case NodeGatherType.Continuous_Gather:
-                        if (lastGatherTime <= 0f)
-                        {
-                            colliderRef = col.transform;
-                            DropItems_ContinuousGather();
-                        }
-                        break;
+                    switch (gatherType)
+                    {
+                        case NodeGatherType.Continuous_Gather:
+                            if (lastGatherTime <= 0f)
+                            {
+                                colliderRef = col.transform;
+                                DropItems_ContinuousGather();
+                            }
+                            break;
+                    }
+                }
+                else
+                {
+                    Debug.Log("Player does not have item required to harvest");
+                    //Game may bump player, or give them damage? Though probably node dependent.
                 }
             }
-            else
-            {
-                Debug.Log("Player does not have item required to harvest");
-                //Game may bump player, or give them damage? Though probably node dependent.
-            }
         }
-
     }
 
     void DropItems_DestroyGather()
@@ -193,5 +213,10 @@ public class ResourceNode : MonoBehaviour {
     public void DeactivateNode()
     {
         meshObject.SetActive(false);
+        nodeIsActive = false;
+        if(doesRespawn == false)
+        {
+            nodeData.nodeIsActive = false;
+        }
     }
 }

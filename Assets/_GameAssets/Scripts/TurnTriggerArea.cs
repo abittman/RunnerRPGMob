@@ -4,16 +4,16 @@ using System.Collections.Generic;
 public class TurnTriggerArea : MonoBehaviour {
 
     public bool isTownTurnArea = false;
-    public List<PathPiece> townConnectedPieces = new List<PathPiece>();
+    public List<BuiltPathPiece> townConnectedPieces = new List<BuiltPathPiece>();
 
-    public List<PathPiece> proceduralConnectedPieces = new List<PathPiece>();
+    public List<BuiltPathPiece> proceduralConnectedPieces = new List<BuiltPathPiece>();
 
     public PlayerRunner pRunner;
     
-    public PathPiece northPiece;
-    public PathPiece southPiece;
-    public PathPiece eastPiece;
-    public PathPiece westPiece;
+    public BuiltPathPiece northPiece;
+    public BuiltPathPiece southPiece;
+    public BuiltPathPiece eastPiece;
+    public BuiltPathPiece westPiece;
 
     // Use this for initialization
     void Start ()

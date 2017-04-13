@@ -7,9 +7,13 @@ public class RunnerSceneManager : MonoBehaviour {
     public TownManagementManager townManagement;
     public PlayerRunner playerRunner;
     public PlayerSwipeInput pInput;
+    public UIScreenManager screenMan;
 
     public bool onMenu = true;
     public bool onGame = false;
+
+    public string defaultMenuScreenID;
+    public string defaultGameScreenID;
 
     static RunnerSceneManager instance;
 
@@ -64,6 +68,7 @@ public class RunnerSceneManager : MonoBehaviour {
         playerRunner.StopRunner();
         pInput.DeactivateControl();
         townManagement.ReturnToMainMenu();
+        screenMan.ActivateUIScreen(defaultMenuScreenID);
     }
 
     public void ToRunner()
@@ -71,5 +76,6 @@ public class RunnerSceneManager : MonoBehaviour {
         townManagement.CloseMainMenu();
         playerRunner.StartRunner();
         pInput.ActivateControl();
+        screenMan.ActivateUIScreen(defaultGameScreenID);
     }
 }

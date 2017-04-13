@@ -65,6 +65,9 @@ public class PlayerRunner : MonoBehaviour {
 
     public Vector3 nextLeftMidPos;
     public Vector3 nextRightMidPos;
+    Vector3 lastMidPos;
+    bool lastTurnIsLeft = false;
+    bool lastTurnIsRight = false;
 
     //Sliding
     bool doSliding = false;
@@ -353,14 +356,18 @@ public class PlayerRunner : MonoBehaviour {
         bool isLeftTurn = false;
         bool isRightTurn = false;
 
+        lastMidPos = currentMidLanePos;
+
         if(inputDir > 0f)
         {
             isRightTurn = true;
+            lastTurnIsRight = true;
             currentMidLanePos = nextRightMidPos;
         }
         else
         {
             isLeftTurn = true;
+            lastTurnIsLeft = true;
             currentMidLanePos = nextLeftMidPos;
         }
 
@@ -615,6 +622,10 @@ public class PlayerRunner : MonoBehaviour {
                     break;
             }
         }
+        else
+        {
+            Debug.Log("Don't turn?");
+        }
         //Debug.Log("current pos " + currentPos);
         transform.position = currentPos;
 
@@ -827,6 +838,9 @@ public class PlayerRunner : MonoBehaviour {
     public void CancelTurnPrep()
     {
         canTurn = false;
+        lastTurnIsLeft = false;
+        lastTurnIsRight = false;
+        lastMidPos = Vector3.zero;
     }
 
     public void CanTurnIntoBuildingFromLane(BuildingInteraction building)
@@ -911,6 +925,27 @@ public class PlayerRunner : MonoBehaviour {
         if (Vector3.Distance(transform.position, goalLocation) < 1f)
         {
             movingToPoint = false;
+        }
+    }
+
+    public void Bump_ForcePlayerToTurn()
+    {
+        //Animation?
+
+        //Turn player - [TODO] Default right for now. Determine if this is more elaborate later?
+        if (lastTurnIsRight)
+        {
+            nextLeftMidPos = lastMidPos;
+            TurnRunner(-1f);
+        }
+        else if(lastTurnIsLeft)
+        {
+            nextRightMidPos = lastMidPos;
+            TurnRunner(1f);
+        }
+        else
+        {
+            TurnRunner(1f);
         }
     }
 }

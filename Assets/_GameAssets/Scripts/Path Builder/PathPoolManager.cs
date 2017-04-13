@@ -13,11 +13,27 @@ public class PathPoolManager : MonoBehaviour {
     public BuiltPathPiece currentBuiltPathPiece;
     public BuiltPathPiece lastBuiltPathPiece;
 
-    void Start()
+    public void InitialPathSetup()
     {
         for(int i = 0; i < allPathedAreas.Count; i++)
         {
             allPathedAreas[i].SetupPoolGroup();
+        }
+        DeactivateAllPoolPieces();
+        SetStartingArea(AreaTypes.Town);
+    }
+
+    public void SetupAllStartData(List<PathPoolGroup_Data> ppg_Data)
+    {
+        for(int i = 0; i < ppg_Data.Count; i++)
+        {
+            PathPoolGroup pa = allPathedAreas.Find(x => x.thisPPGData.pathPoolGroupID == ppg_Data[i].pathPoolGroupID);
+
+            if(pa != null)
+            {
+                pa.thisPPGData = ppg_Data[i];
+                pa.SetupPoolGroup();
+            }
         }
 
         DeactivateAllPoolPieces();
@@ -54,6 +70,7 @@ public class PathPoolManager : MonoBehaviour {
         {
             pathBuilder.BuildFixedArea(currentPathPoolGroup);
             pathBuilder.BuildExtensionsToFixedArea();
+            currentPathPoolGroup.Fixed_SetupLocalReferences();
         }
     }
 
@@ -170,7 +187,7 @@ public class PathPoolManager : MonoBehaviour {
         }
         else
         {
-            Debug.LogWarning("No inactive bpp found");
+            Debug.LogWarning("No inactive bpp found for group " + pathPoolGroup.thisPathedArea.thisAreaType);
             return null;
         }
     }

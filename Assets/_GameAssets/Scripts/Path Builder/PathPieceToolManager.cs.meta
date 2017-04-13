@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: d6fd60d136673f944a36e5aec71c475b
+timeCreated: 1490563377
+licenseType: Pro
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - pathCube1: {fileID: 1085520175292750, guid: ce218b67faac4ea4f86e57e473f4a044,
+      type: 2}
+  - pathCube2: {fileID: 1839586523965868, guid: 65f4ca3d6bd9312458267f90bc40afc3,
+      type: 2}
+  - pathCube3: {fileID: 1317548481683310, guid: 10d02a6a4f6a1b84d8477775a4906701,
+      type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

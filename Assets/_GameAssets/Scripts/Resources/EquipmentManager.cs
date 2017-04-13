@@ -29,7 +29,9 @@ public class EquipmentManager : MonoBehaviour {
     public List<EquipmentItem> pickEquipments = new List<EquipmentItem>();
     EquipmentItem currentPick;
 
-    void Start()
+    public PathPoolManager ppMan;
+
+    void Awake()
     {
         //Temp
         currentAxe = axeEquipments[0];
@@ -65,57 +67,31 @@ public class EquipmentManager : MonoBehaviour {
     }
 
     //[TODO] Link this to the ability to give new equipment (perhaps with reource manager)
-    public void ObtainedNewEquipment(EquipmentItem newItem)
+    public void ObtainedNewEquipment(string equipmentID)
     {
-        EquipmentItem localRef = null;
-        switch(newItem.equipType)
+        //Check axe. If axe, add equipment
+        EquipmentItem localRef = axeEquipments.Find(x => x.equipmentName == equipmentID);
+        if (localRef != null)
         {
-            case EquipmentType.Wood_Cutting:
-                localRef = axeEquipments.Find(x => x.equipmentName == newItem.equipmentName);
-                if (localRef != null)
-                {
-                    localRef.isObtained = true;
-                }
-                else
-                {
-                    axeEquipments.Add(newItem);
-                }
+            localRef.isObtained = true;
 
-                if (currentAxe == null)
+            if (currentAxe == null)
+            {
+                currentAxe = localRef;
+            }
+            else
+            {
+                if (currentAxe.equipLevel < localRef.equipLevel)
                 {
                     currentAxe = localRef;
                 }
-                else
-                {
-                    if (currentAxe.equipLevel < localRef.equipLevel)
-                    {
-                        currentAxe = localRef;
-                    }
-                }
-                break;
-            case EquipmentType.Ore_Mining:
-                localRef = pickEquipments.Find(x => x.equipmentName == newItem.equipmentName);
-                if (localRef != null)
-                {
-                    localRef.isObtained = true;
-                }
-                else
-                {
-                    pickEquipments.Add(newItem);
-                }
+            }
 
-                if (currentPick == null)
-                {
-                    currentPick = localRef;
-                }
-                else
-                {
-                    if(currentPick.equipLevel < localRef.equipLevel)
-                    {
-                        currentPick = localRef;
-                    }
-                }
-                break;
+            ppMan.currentPathPoolGroup.Fixed_SetupLocalReferences();
+        }
+        else
+        {
+            Debug.LogError("Equipment of name " + equipmentID + " does not exist");
         }
     }
 }

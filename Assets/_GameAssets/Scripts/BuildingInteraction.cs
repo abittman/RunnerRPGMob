@@ -13,7 +13,8 @@ public class BuildingInteraction : MonoBehaviour {
 
     public Transform exitLocation;
 
-    public GameObject linkedUIRef;
+    public UIScreenManager screenMan;
+    public string linkedUIID;
 
     public bool turnPlayerAround = false;
 
@@ -37,7 +38,7 @@ public class BuildingInteraction : MonoBehaviour {
             || pRunner.movingToPoint)
         {
             pRunner.BuildingEntered(this);
-            linkedUIRef.SetActive(true);
+            screenMan.ActivateUIScreen(linkedUIID);
         }
     }
 
