@@ -12,7 +12,7 @@ public class WorldEvent : MonoBehaviour {
 
     [Header("References")]
     public WorldEventManager worldEventMan;
-    public PlayerRunner pRunner;
+    public PlayerEventHandler pEventHandler;
     public MainGameplayCamera mainGameCamera;
     public ConversationManager conManager;
 
@@ -49,7 +49,7 @@ public class WorldEvent : MonoBehaviour {
     {
         //Pause player
         //pRunner.StopRunner();
-        pRunner.MovePlayerToLocation(playerEventWaitLocation.position);
+        pEventHandler.MovePlayerToLocation(playerEventWaitLocation.position);
 
         //Move camera
         mainGameCamera.WatchObject(cameraHoldLocation.position, cameraLookAtLocation);
@@ -70,7 +70,7 @@ public class WorldEvent : MonoBehaviour {
 
         //Reactivate normal play
         mainGameCamera.WatchPlayer();
-        pRunner.StartRunner();
+        //[TODO] pEventHandler.StartRunner();
         if(fireOnceEvent)
         {
             gameObject.SetActive(false);

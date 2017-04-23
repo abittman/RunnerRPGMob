@@ -25,11 +25,11 @@ public class PlayerRunner : MonoBehaviour {
     public MainGameplayCamera gameCamera;
 
     [Space]
-    public PlayerCombat pCombat;
     public PlayerAnimationController pAniController;
 
     public Rigidbody playerRB;
 
+    [Header("Runner controls")]
     public float moveSpeed = 10f;
     public float tiltSpeed = 1f;
 
@@ -74,20 +74,18 @@ public class PlayerRunner : MonoBehaviour {
     public float slideTimer = 1f;
     float currentSlideTimer = 0f;
 
-    //Building travel
-    BuildingInteraction currentBuildingRef;
-    public bool moveIntoBuilding = false;
-    bool moveOutOfBuilding = false;
+    //Tracking
+    BuiltPathPiece currentBPP;
 
-    public bool movingToPoint = false;
-    Vector3 goalLocation;
-
-    // Use this for initialization
-    void Start ()
+    public void SetupRunner(BuiltPathPiece startingBPP, Transform startingLocation)
     {
-        currentMoveDirection = MoveDirection.North;
         currentLane = RunningLane.Mid;
-        currentMidLanePos.x = -40f;
+        currentMoveDirection = MoveDirection.North;
+
+        transform.position = startingLocation.position;
+        transform.rotation = startingLocation.rotation;
+
+        currentBPP = startingBPP;
     }
 	
 	// Update is called once per frame
@@ -114,18 +112,6 @@ public class PlayerRunner : MonoBehaviour {
                     pAniController.StraightRunAnimation();
                 }
             }
-        }
-        else if(moveIntoBuilding)
-        {
-            MoveToBuildingPoint();
-        }
-        else if(moveOutOfBuilding)
-        {
-            MoveAwayFromBuilding();
-        }
-        else if(movingToPoint)
-        {
-            MoveToPoint();
         }
 	}
 
@@ -162,21 +148,11 @@ public class PlayerRunner : MonoBehaviour {
         {
             isGrounded = false;
         }
-
-        //Check if attacking ahead
-        if(pCombat.CanDoFrontAttack())
-        {
-            pCombat.DoFrontAttack();
-        }
     }
 
     public void DoLeft()
     {
-        if (currentBuildingRef != null)
-        {
-            TurnIntoBuilding();
-        }
-        else if (canTurn)
+        if (canTurn)
         {
             TurnRunner(-1f);
         }
@@ -263,11 +239,7 @@ public class PlayerRunner : MonoBehaviour {
 
     public void DoRight()
     {
-        if (currentBuildingRef != null)
-        {
-            TurnIntoBuilding();
-        }
-        else if (canTurn)
+        if (canTurn)
         {
             TurnRunner(1f);
         }
@@ -347,7 +319,6 @@ public class PlayerRunner : MonoBehaviour {
                         break;
                 }
             }
-            
         }
     }
 
@@ -653,8 +624,6 @@ public class PlayerRunner : MonoBehaviour {
             doLaneChange = false;
             laneChangeTimer = 0f;
             pAniController.StraightRunAnimation();
-            pCombat.pFXController.StopAttackFX();
-            pEventHandler.ChangeLaneEvent(currentLane);
         }
     }
 
@@ -841,91 +810,6 @@ public class PlayerRunner : MonoBehaviour {
         lastTurnIsLeft = false;
         lastTurnIsRight = false;
         lastMidPos = Vector3.zero;
-    }
-
-    public void CanTurnIntoBuildingFromLane(BuildingInteraction building)
-    {
-        currentBuildingRef = building;
-    }
-
-    public void BuildingEntered(BuildingInteraction building)
-    {
-        currentBuildingRef = building;
-        doMove = false;
-        gameCamera.WatchObject(currentBuildingRef.cameraHoldPosition.position, currentBuildingRef.cameraNewLookAt);
-    }
-
-    public void CanNoLongerTurnIntoBuildingFromLane(BuildingInteraction building)
-    {
-        if (moveIntoBuilding == false
-            && moveOutOfBuilding == false)
-        {
-            currentBuildingRef = null;
-        }
-    }
-
-    public void TurnIntoBuilding()
-    {
-        moveIntoBuilding = true;
-        doMove = false;
-        gameCamera.WatchObject(currentBuildingRef.cameraHoldPosition.position, currentBuildingRef.cameraNewLookAt);
-    }
-
-    void MoveToBuildingPoint()
-    {
-        transform.position = Vector3.MoveTowards(transform.position, currentBuildingRef.playerInteractionLocation.position, Time.deltaTime);
-        if (Vector3.Distance(transform.position, currentBuildingRef.playerInteractionLocation.position) < 1f)
-        {
-            moveIntoBuilding = false;
-        }
-    }
-
-    public void ExitBuilding()
-    {
-        moveOutOfBuilding = true;
-        gameCamera.WatchPlayer();
-        if(currentBuildingRef.turnPlayerAround)
-        {
-            transform.eulerAngles += new Vector3(0f, 180f, 0f);
-            int moveDir = (int)currentMoveDirection + 2;
-            if(moveDir > 4)
-            {
-                moveDir -= 4;
-            }
-            currentMoveDirection = (MoveDirection)moveDir;
-        }
-    }
-
-    void MoveAwayFromBuilding()
-    {
-        transform.position = Vector3.MoveTowards(transform.position, currentBuildingRef.exitLocation.position, Time.deltaTime);
-        if (Vector3.Distance(transform.position, currentBuildingRef.exitLocation.position) < 1f)
-        {
-            moveOutOfBuilding = false;
-            BuildingExited();
-        }
-    }
-
-    void BuildingExited()
-    {
-        doMove = true;
-        currentBuildingRef = null;
-    }
-
-    public void MovePlayerToLocation(Vector3 waitPoint)
-    {
-        movingToPoint = true;
-        doMove = false;
-        goalLocation = waitPoint;
-    }
-
-    void MoveToPoint()
-    {
-        transform.position = Vector3.MoveTowards(transform.position, goalLocation, Time.deltaTime);
-        if (Vector3.Distance(transform.position, goalLocation) < 1f)
-        {
-            movingToPoint = false;
-        }
     }
 
     public void Bump_ForcePlayerToTurn()

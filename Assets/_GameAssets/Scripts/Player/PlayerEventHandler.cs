@@ -3,14 +3,43 @@ using System.Collections.Generic;
 
 public class PlayerEventHandler : MonoBehaviour {
 
-    public List<EnemyBehaviour> listeningEnemies = new List<EnemyBehaviour>();
+    [Header("References")]
+    public PlayerRunner pRunner;
 
-	public void ChangeLaneEvent(RunningLane rLane)
+    [Header("Event Details")]
+    //Building travel
+    BuildingInteraction currentBuildingRef;
+
+    public bool movingToPoint = false;
+    Vector3 goalLocation;
+
+    public void MovePlayerToLocation(Vector3 waitPoint)
     {
-        Debug.Log("Send out player change lane event");
-        for(int i = 0; i < listeningEnemies.Count; i++)
+        movingToPoint = true;
+        pRunner.StopRunner();
+        goalLocation = waitPoint;
+    }
+
+    public void MovePlayerToLocation(Vector3 waitPoint, BuildingInteraction bInteraction)
+    {
+        movingToPoint = true;
+        pRunner.StopRunner();
+        goalLocation = waitPoint;
+        currentBuildingRef = bInteraction;
+    }
+
+    void MoveToPoint()
+    {
+        transform.position = Vector3.MoveTowards(transform.position, goalLocation, Time.deltaTime);
+        if (Vector3.Distance(transform.position, goalLocation) < 1f)
         {
-            listeningEnemies[i].PlayerChangesLanes(rLane);
+            movingToPoint = false;
         }
+    }
+
+    public void ReturnPlayerControl()
+    {
+        //May need to handle "turning around" or something of the like
+        pRunner.StartRunner();
     }
 }

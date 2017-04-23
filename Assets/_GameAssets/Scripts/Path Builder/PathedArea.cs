@@ -27,7 +27,10 @@ public class PathedArea
     [Header("Connection pieces")]
     public List<PathConnectionPiece> connectionPieces = new List<PathConnectionPiece>();
 
-    [Header("Fixed Area Only - Entrances")]
+    [Header("Fixed Area Only")]
+    public Transform fixedAreaStartLocation;
+    public BuiltPathPiece startBPP;
+
     public List<FixedAreaEntrances> entrances = new List<FixedAreaEntrances>();
 
     public PathConnectionPiece GetConnectionPieceOfBPP(BuiltPathPiece bppRef)

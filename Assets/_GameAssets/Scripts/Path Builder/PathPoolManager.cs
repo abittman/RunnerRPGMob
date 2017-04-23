@@ -19,8 +19,10 @@ public class PathPoolManager : MonoBehaviour {
         {
             allPathedAreas[i].SetupPoolGroup();
         }
+        /*
         DeactivateAllPoolPieces();
         SetStartingArea(AreaTypes.Town);
+        */
     }
 
     public void SetupAllStartData(List<PathPoolGroup_Data> ppg_Data)
@@ -35,9 +37,10 @@ public class PathPoolManager : MonoBehaviour {
                 pa.SetupPoolGroup();
             }
         }
-
+        /*
         DeactivateAllPoolPieces();
         SetStartingArea(AreaTypes.Town);
+        */
     }
 
     //Deactivate and clear all active pool pieces
@@ -71,6 +74,7 @@ public class PathPoolManager : MonoBehaviour {
             pathBuilder.BuildFixedArea(currentPathPoolGroup);
             pathBuilder.BuildExtensionsToFixedArea();
             currentPathPoolGroup.Fixed_SetupLocalReferences();
+            currentBuiltPathPiece = currentPathPoolGroup.thisPathedArea.startBPP;
         }
     }
 

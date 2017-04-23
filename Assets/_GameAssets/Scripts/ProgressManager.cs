@@ -32,7 +32,7 @@ public class ProgressManager : MonoBehaviour {
 
     public bool saveFreshDataOnStart = false;
 
-    void Start()
+    public void LoadProgress()
     {
         if(saveFreshDataOnStart == true)
         {
