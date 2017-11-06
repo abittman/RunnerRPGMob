@@ -7,6 +7,7 @@ public class PlayerCollisionDetection : MonoBehaviour {
 
     void OnTriggerEnter(Collider cols)
     {
-        colHandler.ReceiveCollision(this);
+        if(cols.gameObject.CompareTag("Blocker"))
+            colHandler.ReceiveBlockerCollision(this);
     }
 }

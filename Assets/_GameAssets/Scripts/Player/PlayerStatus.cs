@@ -17,7 +17,7 @@ public class PlayerStatus : MonoBehaviour {
 	void Start ()
     {
         currentHealth = maxHealth;
-        healthbarImage.fillAmount = currentHealth / maxHealth;
+        //[TODO] healthbarImage.fillAmount = currentHealth / maxHealth;
 	}
 
     //For when the player hits an obstacle or falls

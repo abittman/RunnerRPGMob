@@ -32,8 +32,8 @@ public class TurnTriggerArea : MonoBehaviour {
             {
                 for (int i = 0; i < townConnectedPieces.Count; i++)
                 {
-                    townConnectedPieces[i].PrepareArea(pRunner.transform.position);
-
+                    townConnectedPieces[i].PrepareArea(transform.position, pRunner.currentMoveDirection);
+                    Debug.Log(townConnectedPieces[i].pieceFacingDirection);
                     switch(townConnectedPieces[i].pieceFacingDirection)
                     {
                         case MoveDirection.North:
@@ -55,7 +55,7 @@ public class TurnTriggerArea : MonoBehaviour {
             {
                 for (int i = 0; i < proceduralConnectedPieces.Count; i++)
                 {
-                    proceduralConnectedPieces[i].PrepareArea(pRunner.transform.position);
+                    proceduralConnectedPieces[i].PrepareArea(transform.position, pRunner.currentMoveDirection);
 
                     switch (proceduralConnectedPieces[i].pieceFacingDirection)
                     {

@@ -11,6 +11,9 @@ public class WorldObstacles : MonoBehaviour {
 
     public bool obstacleForcesTurn = false;
 
+    public GameObject activeObject;
+    public GameObject destroyedObject;
+
 	void SetupObstacle()
     {
     }
@@ -19,7 +22,7 @@ public class WorldObstacles : MonoBehaviour {
     {
         if(cold.gameObject.layer == LayerMask.NameToLayer("PlayerLayer"))
         {
-            pStatus.DamageHealth(obstacleHitDamage);
+            //[TODO] Temp disable - pStatus.DamageHealth(obstacleHitDamage);
 
             if(obstacleForcesTurn)
             {
@@ -27,7 +30,8 @@ public class WorldObstacles : MonoBehaviour {
             }
             if(obstacleIsDestructible)
             {
-                gameObject.SetActive(false);
+                activeObject.SetActive(false);
+                destroyedObject.SetActive(true);
             }
         }
     }

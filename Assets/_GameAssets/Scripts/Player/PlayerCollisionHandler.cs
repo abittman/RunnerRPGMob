@@ -9,18 +9,8 @@ public class PlayerCollisionHandler : MonoBehaviour {
     public PlayerCollisionDetection leftCollision;
     public PlayerCollisionDetection rightCollision;
     public PlayerCollisionDetection frontCollision;
-
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
-
-    public void ReceiveCollision(PlayerCollisionDetection colRef)
+    
+    public void ReceiveBlockerCollision(PlayerCollisionDetection colRef)
     {
         if (colRef == leftCollision)
         {
@@ -32,8 +22,7 @@ public class PlayerCollisionHandler : MonoBehaviour {
         }
         else if (colRef == frontCollision)
         {
-            //Kill player
-            //pStatus.PlayerRunFails();
+            pRunner.PlayerHit();
         }
     }
 }

@@ -2,21 +2,30 @@
 using System.Collections;
 
 public class PlayerFXController : MonoBehaviour {
+    
+    [Header("Hit Effects")]
+    public Renderer playerRenderer;
+    public Color hitColour;
+    public AnimationCurve hitMatLerpCurve;
+    public float hitFXTime = 1f;
 
-    public GameObject swordTrail;
-
-    void Start()
+    public void PlayPlayerHitFX()
     {
-        StopAttackFX();
+        StartCoroutine(HitFX());
     }
 
-    public void StopAttackFX()
+    IEnumerator HitFX()
     {
-        swordTrail.SetActive(false);
-    }
+        float timer = 0f;
 
-	public void DoAttackFX()
-    {
-        swordTrail.SetActive(true);
+        while(timer < hitFXTime)
+        {
+            timer += Time.deltaTime;
+            float curveEval = hitMatLerpCurve.Evaluate(timer / hitFXTime);
+            playerRenderer.material.color = Color.Lerp(Color.white, hitColour, curveEval);
+            yield return null;
+        }
+
+        playerRenderer.material.color = Color.white;
     }
 }

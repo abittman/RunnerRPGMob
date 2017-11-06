@@ -70,22 +70,22 @@ public class BuiltPathPiece : MonoBehaviour {
     }
 
 
-    public void PrepareArea(Vector3 currentPlayerPos)
+    public void PrepareArea(Vector3 turnAreaPos, MoveDirection playerMoveDir)
     {
         Debug.Log("Prepare area " + gameObject.name);
         //Determine direction without much work on my part in other scripts
-        Vector3 directionFromAreaToPlayer = transform.position - currentPlayerPos;
-
+        Vector3 directionFromTurnAreaToPiece = transform.position - turnAreaPos;
+        MoveDirection directionAssumingNorth = MoveDirection.North;
         //If more X (east-west) than Z(north-south)
-        if (Mathf.Abs(directionFromAreaToPlayer.x) > Mathf.Abs(directionFromAreaToPlayer.z))
+        if (Mathf.Abs(directionFromTurnAreaToPiece.x) > Mathf.Abs(directionFromTurnAreaToPiece.z))
         {
-            if (directionFromAreaToPlayer.x < 0f)
+            if (directionFromTurnAreaToPiece.x < 0f)
             {
-                pieceFacingDirection = MoveDirection.West;
+                directionAssumingNorth = MoveDirection.West;
             }
-            else if (directionFromAreaToPlayer.x > 0f)
+            else if (directionFromTurnAreaToPiece.x > 0f)
             {
-                pieceFacingDirection = MoveDirection.East;
+                directionAssumingNorth = MoveDirection.East;
             }
             else
             {
@@ -94,38 +94,17 @@ public class BuiltPathPiece : MonoBehaviour {
         }
         else
         {
-            if (directionFromAreaToPlayer.z < 0f)
+            if (directionFromTurnAreaToPiece.z < 0f)
             {
-                pieceFacingDirection = MoveDirection.South;
+                directionAssumingNorth = MoveDirection.South;
             }
-            else if (directionFromAreaToPlayer.z > 0f)
+            else if (directionFromTurnAreaToPiece.z > 0f)
             {
-                pieceFacingDirection = MoveDirection.North;
+                directionAssumingNorth = MoveDirection.North;
             }
         }
 
-        /*
-        if (isTownPiece)
-        {
-            switch (pieceFacingDirection)
-            {
-                case MoveDirection.East:
-                    alternateFacingDirection = MoveDirection.West;
-                    break;
-                case MoveDirection.West:
-                    alternateFacingDirection = MoveDirection.East;
-                    break;
-                case MoveDirection.South:
-                    alternateFacingDirection = MoveDirection.North;
-                    break;
-                case MoveDirection.North:
-                    alternateFacingDirection = MoveDirection.South;
-                    break;
-            }
-        }
-        */
-
-        //Activate nodes?
+        pieceFacingDirection = directionAssumingNorth;
     }
 
 }

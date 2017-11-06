@@ -26,57 +26,84 @@ public class PlayerRunner : MonoBehaviour {
 
     [Space]
     public PlayerAnimationController pAniController;
+    public PlayerFXController fxController;
 
     public Rigidbody playerRB;
 
-    [Header("Runner controls")]
-    public float moveSpeed = 10f;
-    public float tiltSpeed = 1f;
-
-    public float jumpForce = 100f;
-    public float slideAirDownForce = 100f;
-
+    [Header("Current Status")]
     public bool doMove = true;
-
+    public bool inHitRecovery = false;
     public bool canTurn = false;
+    public bool canMoveInAir = false;       //Upgrade ability
+    public bool canWallRun = false;         //Upgrade ability
+    public bool canJump = false;            //In case it gets cancelled somehow?
     public MoveDirection currentMoveDirection;
     public RunningLane currentLane;
 
-    public GameObject meshObject;
-
-    public LayerMask groundingMask;
     bool isGrounded = false;
     RaycastHit hit;
 
+    [Header("Movement Stats")]
+    float currentMoveSpeed;
+    public float moveSpeed = 10f;
+    [Space]
+    public float hitMoveSpeed = 3f;
+    public float hitRecoveryTime = 2f;
+    float hitRecoveryTimer = 0f;
+    public AnimationCurve hitRecoveryAccelCurve;
+
+    [Header("Jumping Stats")]
+    public Transform playerGroundingRoot;
+    public LayerMask groundingMask;
+    public float jumpForce = 100f;
+
+    [Header("Sliding Stats")]
+    public float slideAirDownForce = 100f;
+    //Sliding
+    bool doSliding = false;
+    bool pendingSlideAnimation = false;
+    public float slideTimer = 1f;
+    float currentSlideTimer = 0f;
+
+    [Header("Lane Changing Stats")]
     //Lane changing variables
     Vector3 currentMidLanePos = Vector3.zero;
     public float laneChangeTransitionTime = 0.2f;
     float laneChangeTimer = 0f;
     public float laneChangeDistance = 2f;
+    public AnimationCurve laneChangeAniCurve;
     bool doLaneChange = false;
     float startX;
     float goalX;
     float startZ;
     float goalZ;
 
+    [Header("Bumping Stats")]
     public float bumpBackTransitionTime = 0.2f;
     float bumpBackTimer = 0f;
     bool doBumpBack = false;
 
+    [Header("Turning stats")]
     public Vector3 nextLeftMidPos;
     public Vector3 nextRightMidPos;
     Vector3 lastMidPos;
     bool lastTurnIsLeft = false;
     bool lastTurnIsRight = false;
-
-    //Sliding
-    bool doSliding = false;
-    public float slideTimer = 1f;
-    float currentSlideTimer = 0f;
+    public bool doCompleteStopOnTurn = true;
+    public float timeToReturnToSpeed = 1f;
+    public AnimationCurve turnReturnToSpeedAniCurve;
 
     //Tracking
     BuiltPathPiece currentBPP;
 
+    [Header("Wall running stats")]
+    bool isWallRunning = false;
+    public float wallDetectionLength = 3f;
+    public float wallRunningTime = 1f;
+    public float wallRunningHeight = 5f;
+    float wallRunningTimer = 0f;
+
+    #region Runner_Setup
     public void SetupRunner(BuiltPathPiece startingBPP, Transform startingLocation)
     {
         currentLane = RunningLane.Mid;
@@ -87,13 +114,20 @@ public class PlayerRunner : MonoBehaviour {
 
         currentBPP = startingBPP;
     }
-	
-	// Update is called once per frame
-	void Update ()
+    #endregion
+
+    // Update is called once per frame
+    void Update ()
     {
 	    if(doMove)
         {
             AutoRun();
+
+            if(isWallRunning)
+            {
+                ContinueWallRunning();
+            }
+
             if(doLaneChange)
             {
                 LaneChangeRunner();
@@ -105,6 +139,15 @@ public class PlayerRunner : MonoBehaviour {
             if(doSliding)
             {
                 currentSlideTimer += Time.deltaTime;
+                if(pendingSlideAnimation)
+                {
+                    if(isGrounded)
+                    {
+                        pAniController.SlideAnimation();
+                        pendingSlideAnimation = false;
+                    }
+                }
+
                 if(currentSlideTimer >= slideTimer)
                 {
                     currentSlideTimer = 0f;
@@ -115,6 +158,7 @@ public class PlayerRunner : MonoBehaviour {
         }
 	}
 
+    #region RunningMovement
     public void StopRunner()
     {
         doMove = false;
@@ -132,10 +176,27 @@ public class PlayerRunner : MonoBehaviour {
 
     void AutoRun()
     {
-        transform.position += moveSpeed * Time.deltaTime * transform.forward;
+        if(inHitRecovery)
+        {
+            hitRecoveryTimer += Time.deltaTime;
+            float curveEval = hitRecoveryAccelCurve.Evaluate(hitRecoveryTimer / hitRecoveryTime);
+            currentMoveSpeed = Mathf.Lerp(hitMoveSpeed, moveSpeed, curveEval);
+
+            if(hitRecoveryTimer >= hitRecoveryTime)
+            {
+                currentMoveSpeed = moveSpeed;
+                inHitRecovery = false;
+            }
+        }
+        else
+        {
+            currentMoveSpeed = moveSpeed;
+        }
+
+        transform.position += currentMoveSpeed * Time.deltaTime * transform.forward;
 
         //Check grounding
-        if (Physics.Raycast(transform.position, Vector3.down, out hit, 2.5f, groundingMask))
+        if (Physics.Raycast(playerGroundingRoot.position, Vector3.down, out hit, .25f, groundingMask))
         {
             //Is grounded
             if(isGrounded == false)
@@ -150,8 +211,20 @@ public class PlayerRunner : MonoBehaviour {
         }
     }
 
+    public void PlayerHit()
+    {
+        Debug.Log("Player hit");
+        inHitRecovery = true;
+        hitRecoveryTimer = 0f;
+        fxController.PlayPlayerHitFX();
+    }
+    #endregion
+
+    #region Left_Right_Behaviour
     public void DoLeft()
     {
+        CheckWallRunning(-1);
+
         if (canTurn)
         {
             TurnRunner(-1f);
@@ -239,6 +312,8 @@ public class PlayerRunner : MonoBehaviour {
 
     public void DoRight()
     {
+        CheckWallRunning(1);
+
         if (canTurn)
         {
             TurnRunner(1f);
@@ -322,6 +397,8 @@ public class PlayerRunner : MonoBehaviour {
         }
     }
 
+    //Code to turn the runner on a piece to face a new direction
+    //[TODO] Really long. Clean it up in the future
     void TurnRunner(float inputDir)
     {
         bool isLeftTurn = false;
@@ -604,6 +681,7 @@ public class PlayerRunner : MonoBehaviour {
         nextRightMidPos = Vector3.zero;
     }
 
+    //Function changes the lane of the runner
     void LaneChangeRunner()
     {
         laneChangeTimer += Time.deltaTime;
@@ -626,7 +704,9 @@ public class PlayerRunner : MonoBehaviour {
             pAniController.StraightRunAnimation();
         }
     }
+    #endregion
 
+    #region Jumping_Behaviour
     public void DoJump()
     {
         if (isGrounded)
@@ -637,39 +717,40 @@ public class PlayerRunner : MonoBehaviour {
 
     void JumpRunner()
     {
-        gameObject.GetComponent<Rigidbody>().AddForce(transform.up * jumpForce, ForceMode.Impulse);
+        playerRB.AddForce(transform.up * jumpForce, ForceMode.Impulse);
         
         pAniController.JumpAnimation();
         
         doSliding = false;
         currentSlideTimer = 0f;
     }
+    #endregion
 
+    #region Sliding_Behaviour
     public void DoSlide()
     {
-        if (isGrounded)
-        {
-            
-            SlideRunner();
-            
-        }
-        else
-        {
-            SlideRunner();
-        }
+        SlideRunner();
     }
 
     void SlideRunner()
     {
         //Setup an animation to handle this
         doSliding = true;
-        pAniController.SlideAnimation();
+        if(!pendingSlideAnimation)
         if(isGrounded == false)
         {
-            gameObject.GetComponent<Rigidbody>().AddForce(-transform.up * slideAirDownForce, ForceMode.Impulse);
+            playerRB.AddForce(-transform.up * slideAirDownForce, ForceMode.Impulse);
+            pendingSlideAnimation = true;
+        }
+        else
+        {
+            pAniController.SlideAnimation();
+            pendingSlideAnimation = false;
         }
     }
+    #endregion
 
+    //I dont think bumping works yet / at the moment?
     public void DoBumpLeft()
     {
         doLaneChange = false;
@@ -754,6 +835,7 @@ public class PlayerRunner : MonoBehaviour {
         }
     }
 
+    #region Turning_Prep
     public void PrepareTurn(TurnTriggerArea triggerAreaRef)
     {
         canTurn = true;
@@ -832,4 +914,55 @@ public class PlayerRunner : MonoBehaviour {
             TurnRunner(1f);
         }
     }
+    #endregion
+
+    #region Wall_Running
+    void CheckWallRunning(int direction)
+    {
+        RaycastHit hit;
+        if(Physics.Raycast(transform.position, transform.right * direction, out hit, wallDetectionLength, groundingMask))
+        {
+            if(hit.collider.gameObject.CompareTag("Wall"))
+            {
+                Debug.Log("Can wall run!~");
+                StartWallRunning(direction);
+            }
+        }
+    }
+
+    void StartWallRunning(float direction)
+    {
+        isWallRunning = true;
+        //Left
+        if (direction == -1)
+        {
+            //playerRB.AddForce(transform.up * jumpForce, ForceMode.Impulse);
+            playerRB.useGravity = false;
+            wallRunningTimer = 0f;
+            pAniController.DoWallRunAnimation(-1);
+        }
+        else if(direction == 1)
+        {
+            playerRB.useGravity = false;
+            wallRunningTimer = 0f;
+            pAniController.DoWallRunAnimation(1);
+        }
+    }
+
+    void ContinueWallRunning()
+    {
+        wallRunningTimer += Time.deltaTime;
+
+        if(wallRunningTimer >= wallRunningTime)
+        {
+            ExitWallRunning();
+        }
+    }
+
+    void ExitWallRunning()
+    {
+        playerRB.useGravity = true;
+        pAniController.StraightRunAnimation();
+    }
+    #endregion
 }
